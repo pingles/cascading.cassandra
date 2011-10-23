@@ -42,7 +42,7 @@ public class CassandraSchemeTest extends TestCase {
         Fields keyFields = new Fields( "num" );
         Fields[] valueFields = new Fields[]{new Fields("lower"), new Fields("upper")};
 
-        Tap sink = new Lfs(new TextLine(), "./src/test/data/tmp-out.txt");
+        Tap sink = new Lfs(new TextLine(), "./tmp/test-out.txt");
         Flow parseFlow = new FlowConnector(properties).connect(source, sink, parsePipe);
         parseFlow.complete();
 

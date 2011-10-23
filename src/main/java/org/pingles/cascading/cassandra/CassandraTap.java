@@ -1,0 +1,84 @@
+package org.pingles.cascading.cassandra;
+
+import cascading.tap.SinkMode;
+import cascading.tap.Tap;
+import cascading.tap.hadoop.TapCollector;
+import cascading.tap.hadoop.TapIterator;
+import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.TupleEntryIterator;
+import org.apache.commons.lang.NotImplementedException;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.JobConf;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+
+public class CassandraTap extends Tap {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CassandraScheme.class);
+
+    private static final String SCHEME = "cassandra";
+    private String columnFamilyName;
+
+    public CassandraTap(String columnFamilyName, CassandraScheme scheme) {
+        super(scheme, SinkMode.APPEND);
+        this.columnFamilyName = columnFamilyName;
+    }
+
+    private URI getUri() {
+        try {
+            return new URI(SCHEME, columnFamilyName, null);
+        } catch (URISyntaxException e) {
+            return null;
+        }
+    }
+
+    @Override
+    public void sinkInit(JobConf conf) throws IOException {
+        LOGGER.info("Sinking to column family: {}", columnFamilyName);
+        super.sinkInit(conf);
+    }
+
+    @Override
+    public void sourceInit(JobConf conf) throws IOException {
+        LOGGER.info("Sourcing from column family: {}", columnFamilyName);
+        super.sourceInit(conf);
+    }
+
+    @Override
+    public Path getPath() {
+        return new Path(getUri().toString());
+    }
+
+    @Override
+    public TupleEntryIterator openForRead(JobConf jobConf) throws IOException {
+        return new TupleEntryIterator(getSourceFields(), new TapIterator(this, jobConf));
+    }
+
+    @Override
+    public TupleEntryCollector openForWrite(JobConf jobConf) throws IOException {
+        return new TapCollector(this, jobConf);
+    }
+
+    @Override
+    public boolean makeDirs(JobConf jobConf) throws IOException {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public boolean deletePath(JobConf jobConf) throws IOException {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public boolean pathExists(JobConf jobConf) throws IOException {
+        throw new NotImplementedException();
+    }
+
+    @Override
+    public long getPathModified(JobConf jobConf) throws IOException {
+        throw new NotImplementedException();
+    }
+}
