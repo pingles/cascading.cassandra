@@ -1,18 +1,15 @@
 package org.pingles.cascading.cassandra;
 
-import org.apache.cassandra.service.CassandraDaemon;
-
-import java.io.IOException;
+import org.apache.cassandra.thrift.CassandraDaemon;
 
 public class EmbeddedCassandraService {
-    private final CassandraDaemon daemon;
+    private CassandraDaemon daemon;
 
-    public EmbeddedCassandraService() throws IOException {
-        daemon = new org.apache.cassandra.thrift.CassandraDaemon();
-        daemon.init(null);
+    public EmbeddedCassandraService() {
+        daemon = new CassandraDaemon();
     }
 
-    public void start() throws IOException {
+    public void start() {
         daemon.start();
     }
 
