@@ -2,10 +2,15 @@ package org.pingles.cascading.cassandra;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.ColumnPath;
+import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
+import org.apache.cassandra.thrift.TimedOutException;
+import org.apache.cassandra.thrift.UnavailableException;
 import org.apache.thrift.TException;
 import org.apache.cassandra.thrift.TBinaryProtocol;
 import org.apache.thrift.transport.TFramedTransport;
@@ -14,6 +19,8 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,6 +30,7 @@ public class CassandraClient {
 
     private Cassandra.Client client;
     private final TTransport transport;
+    private String keyspaceName;
 
     public CassandraClient(String rpcHost, Integer rpcPort) {
         TSocket socket = new TSocket(rpcHost, rpcPort);
@@ -30,6 +38,11 @@ public class CassandraClient {
         TBinaryProtocol protocol = new TBinaryProtocol(transport);
         client = new Cassandra.Client(protocol);
         LOGGER.info("CassandraClient connecting to {}:{}", rpcHost, rpcPort);
+    }
+
+    public CassandraClient(String rpcHost, Integer rpcPort, String keyspaceName) {
+        this(rpcHost, rpcPort);
+        this.keyspaceName = keyspaceName;
     }
 
     public String createKeyspace(String keyspaceName) throws TException, SchemaDisagreementException, InvalidRequestException {
@@ -51,6 +64,16 @@ public class CassandraClient {
 
     public void open() throws InterruptedException, TTransportException {
         transport.open();
+        if (keyspaceName != null) {
+            try {
+                client.send_set_keyspace(keyspaceName);
+                client.recv_set_keyspace();
+            } catch (TException e) {
+                throw new RuntimeException(e);
+            } catch (InvalidRequestException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     public void close() {
@@ -94,5 +117,13 @@ public class CassandraClient {
         client.send_system_add_column_family(cfDef);
         String s = client.recv_system_add_column_family();
         return s;
+    }
+
+    public byte[] getValue(String columnFamilyName, ByteBuffer keyBytes, ByteBuffer nameBytes) throws TException, TimedOutException, NotFoundException, InvalidRequestException, UnavailableException {
+        ColumnPath cp = new ColumnPath(columnFamilyName);
+        cp.setColumn(nameBytes);
+
+        ColumnOrSuperColumn columnOrSuperColumn = client.get(keyBytes, cp, ConsistencyLevel.ONE);
+        return columnOrSuperColumn.column.getValue();
     }
 }

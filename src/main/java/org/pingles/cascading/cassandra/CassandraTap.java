@@ -34,18 +34,13 @@ public class CassandraTap extends Tap {
         this.keyspace = keyspace;
     }
 
-    private URI getUri() {
-        try {
-            return new URI(SCHEME, keyspace, columnFamilyName, null);
-        } catch (URISyntaxException e) {
-            return null;
-        }
-    }
-
     @Override
     public void sinkInit(JobConf conf) throws IOException {
+        LOGGER.info("Created Cassandra tap {}", getPath());
         LOGGER.info("Sinking to column family: {}", columnFamilyName);
+
         super.sinkInit(conf);
+
         ConfigHelper.setOutputColumnFamily(conf, keyspace, columnFamilyName);
         ConfigHelper.setPartitioner(conf, "org.apache.cassandra.dht.RandomPartitioner");
         ConfigHelper.setInitialAddress(conf, this.initialAddress);
@@ -60,7 +55,7 @@ public class CassandraTap extends Tap {
 
     @Override
     public Path getPath() {
-        return new Path(getUri().toString());
+        return new Path(String.format("cassandra://%s:%d/%s/%s", initialAddress, rpcPort, keyspace, columnFamilyName));
     }
 
     @Override

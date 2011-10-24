@@ -5,7 +5,11 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import org.apache.cassandra.hadoop.ColumnFamilyOutputFormat;
+import org.apache.cassandra.thrift.Column;
+import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.Mutation;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -13,16 +17,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class CassandraScheme extends Scheme {
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraScheme.class);
+    private final Fields keyField;
+    private final Fields[] columnFields;
 
     /**
      * Creates a {@link Scheme} for dealing with a regular Column Family.
-     * @param keyFields     the fields to use for the row key
-     * @param nameFields    column names
+     * @param keyField      the field to use for the row key
+     * @param columnFields  column names
      */
-    public CassandraScheme(Fields keyFields, Fields nameFields) {
+    public CassandraScheme(Fields keyField, Fields[] columnFields) {
+        this.keyField = keyField;
+        this.columnFields = columnFields;
     }
 
     @Override
@@ -31,6 +44,8 @@ public class CassandraScheme extends Scheme {
 
     @Override
     public void sinkInit(Tap tap, JobConf jobConf) throws IOException {
+        jobConf.setOutputKeyClass(ByteBuffer.class);
+        jobConf.setOutputValueClass(Mutation.class);
         jobConf.setOutputFormat(ColumnFamilyOutputFormat.class);
     }
 
@@ -41,5 +56,38 @@ public class CassandraScheme extends Scheme {
 
     @Override
     public void sink(TupleEntry tupleEntry, OutputCollector outputCollector) throws IOException {
+        Tuple key = tupleEntry.selectTuple(keyField);
+        TypeInferringSerializer serializer = TypeInferringSerializer.get();
+        byte[] keyBytes = serializer.toBytes(key.get(0));
+
+        for (int i = 0; i < columnFields.length; i++) {
+            Fields selector = columnFields[i];
+            TupleEntry values = tupleEntry.selectEntry(selector);
+
+            for (int j = 0; j < values.getFields().size(); j++) {
+                Fields fields = values.getFields();
+                Tuple tuple = values.getTuple();
+
+                Object name = fields.get(j);
+                Object value = tuple.get(j);
+
+                Mutation mutation = createColumnPutMutation(ByteBuffer.wrap(serializer.toBytes(name)), ByteBuffer.wrap(serializer.toBytes(value)));
+                outputCollector.collect(ByteBuffer.wrap(keyBytes), Collections.singletonList(mutation));
+            }
+        }
+    }
+
+    private Mutation createColumnPutMutation(ByteBuffer name, ByteBuffer value) {
+        Column column = new Column(name);
+        column.setName(name);
+        column.setValue(value);
+        column.setTimestamp(System.currentTimeMillis());
+
+        Mutation m = new Mutation();
+        ColumnOrSuperColumn columnOrSuperColumn = new ColumnOrSuperColumn();
+        columnOrSuperColumn.setColumn(column);
+        m.setColumn_or_supercolumn(columnOrSuperColumn);
+
+        return m;
     }
 }
