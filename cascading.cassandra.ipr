@@ -3,6 +3,42 @@
   <component name="AntConfiguration">
     <defaultAnt bundledAnt="true" />
   </component>
+  <component name="CodeStyleSettingsManager">
+    <option name="PER_PROJECT_SETTINGS">
+      <value>
+        <ADDITIONAL_INDENT_OPTIONS fileType="groovy">
+          <option name="INDENT_SIZE" value="4" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="false" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+          <option name="USE_RELATIVE_INDENTS" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="java">
+          <option name="INDENT_SIZE" value="4" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="false" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+          <option name="USE_RELATIVE_INDENTS" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
+        <ADDITIONAL_INDENT_OPTIONS fileType="xml">
+          <option name="INDENT_SIZE" value="4" />
+          <option name="CONTINUATION_INDENT_SIZE" value="8" />
+          <option name="TAB_SIZE" value="4" />
+          <option name="USE_TAB_CHARACTER" value="false" />
+          <option name="SMART_TABS" value="false" />
+          <option name="LABEL_INDENT_SIZE" value="0" />
+          <option name="LABEL_INDENT_ABSOLUTE" value="false" />
+          <option name="USE_RELATIVE_INDENTS" value="false" />
+        </ADDITIONAL_INDENT_OPTIONS>
+      </value>
+    </option>
+  </component>
   <component name="CompilerConfiguration">
     <option name="DEFAULT_COMPILER" value="Javac" />
     <resourceExtensions />
@@ -223,28 +259,6 @@
         <root url="jar://$MAVEN_REPOSITORY$/cascading/cascading-core/1.2.4/cascading-core-1.2.4-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: com.ecyrd.speed4j:speed4j:0.9">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/ecyrd/speed4j/speed4j/0.9/speed4j-0.9.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/com/ecyrd/speed4j/speed4j/0.9/speed4j-0.9-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/ecyrd/speed4j/speed4j/0.9/speed4j-0.9-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: com.github.stephenc.eaio-uuid:uuid:3.2.0">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/github/stephenc/eaio-uuid/uuid/3.2.0/uuid-3.2.0.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/com/github/stephenc/eaio-uuid/uuid/3.2.0/uuid-3.2.0-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/com/github/stephenc/eaio-uuid/uuid/3.2.0/uuid-3.2.0-sources.jar!/" />
-      </SOURCES>
-    </library>
     <library name="Maven: com.github.stephenc.high-scale-lib:high-scale-lib:1.1.2">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/com/github/stephenc/high-scale-lib/high-scale-lib/1.1.2/high-scale-lib-1.1.2.jar!/" />
@@ -388,17 +402,6 @@
         <root url="jar://$MAVEN_REPOSITORY$/commons-net/commons-net/1.4.1/commons-net-1.4.1-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: commons-pool:commons-pool:1.5.3">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/commons-pool/commons-pool/1.5.3/commons-pool-1.5.3.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/commons-pool/commons-pool/1.5.3/commons-pool-1.5.3-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/commons-pool/commons-pool/1.5.3/commons-pool-1.5.3-sources.jar!/" />
-      </SOURCES>
-    </library>
     <library name="Maven: hsqldb:hsqldb:1.8.0.7">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/hsqldb/hsqldb/1.8.0.7/hsqldb-1.8.0.7.jar!/" />
@@ -474,17 +477,6 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/log4j/log4j/1.2.16/log4j-1.2.16-sources.jar!/" />
-      </SOURCES>
-    </library>
-    <library name="Maven: me.prettyprint:hector-core:0.8.0-3">
-      <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/me/prettyprint/hector-core/0.8.0-3/hector-core-0.8.0-3.jar!/" />
-      </CLASSES>
-      <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/me/prettyprint/hector-core/0.8.0-3/hector-core-0.8.0-3-javadoc.jar!/" />
-      </JAVADOC>
-      <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/me/prettyprint/hector-core/0.8.0-3/hector-core-0.8.0-3-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: net.java.dev.jets3t:jets3t:0.6.1">

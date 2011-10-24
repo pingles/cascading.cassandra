@@ -40,9 +40,9 @@ memtable_flush_queue_size: 4
 
 # TCP port, for commands and data
 storage_port: 9100
-listen_address: localhost
-rpc_address: 0.0.0.0
-rpc_port: 9160
+listen_address: 127.0.0.1
+rpc_address: 127.0.0.1
+rpc_port: 9960
 
 rpc_keepalive: true
 
