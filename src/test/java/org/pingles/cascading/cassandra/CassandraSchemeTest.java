@@ -9,9 +9,8 @@ import cascading.scheme.TextLine;
 import cascading.tap.Lfs;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
-import junit.framework.TestCase;
 import org.apache.cassandra.service.EmbeddedCassandraService;
-import org.apache.cassandra.thrift.KsDef;
+import org.apache.cassandra.thrift.Cassandra;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -19,10 +18,6 @@ import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.yaml.snakeyaml.Yaml;
-
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,12 +25,12 @@ import java.util.Map;
 @RunWith(JUnit4.class)
 public class CassandraSchemeTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraSchemeTest.class);
+    private static EmbeddedCassandraService cassandra;
 
-    private static final String CASSANDRA_YAML = "./src/test/resources/cassandra.yaml";
     private String inputFile = "./src/test/data/small.txt";
     private final String keyspaceName = "TestKeyspace";
     private final String columnFamilyName = "TestColumnFamily";
-    private static EmbeddedCassandraService cassandra;
+    transient private static Map<Object, Object> properties = new HashMap<Object, Object>();
 
     @BeforeClass
     public static void startCassandra() {
@@ -48,25 +43,10 @@ public class CassandraSchemeTest {
     }
 
     @Before
-    public void ensureTestKeyspace() throws Exception {
-        CassandraClient client = new CassandraClient(getRpcHost(), getRpcPort());
-        client.open();
-        StringBuilder sb = new StringBuilder();
-        for (KsDef ks : client.describeKeyspaces()) {
-            if (sb.length() > 0) {
-                sb.append(", ");
-            }
-            sb.append(ks.name);
-        }
-        LOGGER.info("Current keyspaces: {}", sb.toString());
-        if (!client.keyspaceExists(keyspaceName)) {
-            LOGGER.info("Creating test keyspace {}", keyspaceName);
-            client.createKeyspace(keyspaceName);
-        }
-        client.close();
+    public void ensureCassandraTestStores() throws Exception {
+        CassandraTestUtil.ensureKeyspace(keyspaceName);
+        CassandraTestUtil.ensureColumnFamily(keyspaceName, columnFamilyName);
     }
-
-    transient private static Map<Object, Object> properties = new HashMap<Object, Object>();
 
     @Test
     public void testSomething() {
@@ -76,7 +56,7 @@ public class CassandraSchemeTest {
         Fields keyFields = new Fields("num");
         Fields valueFields = new Fields("lower", "upper");
 
-        Tap sink = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, new CassandraScheme(keyFields, valueFields));
+        Tap sink = new CassandraTap(CassandraTestUtil.getRpcHost(), CassandraTestUtil.getRpcPort(), keyspaceName, columnFamilyName, new CassandraScheme(keyFields, valueFields));
 
         Flow parseFlow = new FlowConnector(properties).connect(source, sink, parsePipe);
         parseFlow.complete();
@@ -84,21 +64,4 @@ public class CassandraSchemeTest {
         assert(true);
     }
 
-    protected Integer getRpcPort() {
-        return (Integer) getCassandraConfiguration("rpc_port");
-    }
-
-    protected String getRpcHost() {
-        return "127.0.0.1";
-    }
-
-    private Object getCassandraConfiguration(String fieldName) {
-        Yaml y = new Yaml();
-        try {
-            Map m = (Map) y.load(new FileReader(CASSANDRA_YAML));
-            return m.get(fieldName);
-        } catch (FileNotFoundException e) {
-            return null;
-        }
-    }
 }

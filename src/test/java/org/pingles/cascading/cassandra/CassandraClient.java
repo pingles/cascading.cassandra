@@ -4,6 +4,7 @@ import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.KsDef;
+import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.thrift.TException;
 import org.apache.cassandra.thrift.TBinaryProtocol;
@@ -13,7 +14,6 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -59,13 +59,40 @@ public class CassandraClient {
 
     public boolean keyspaceExists(String keyspaceName) throws TException, InvalidRequestException {
         List<KsDef> keyspaces = describeKeyspaces();
-
         for (KsDef ksDef : keyspaces) {
             if (ksDef.name.equals(keyspaceName)) {
                 return true;
             }
         }
-
         return false;
+    }
+
+    public boolean columnFamilyExists(String keyspace, String columnFamily) throws TException, NotFoundException, InvalidRequestException {
+        List<CfDef> columnFamilies = listColumnFamilies(keyspace);
+        for (CfDef cfDef : columnFamilies) {
+            if (cfDef.name.equals(columnFamily)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<CfDef> listColumnFamilies(String keyspace) throws TException, NotFoundException, InvalidRequestException {
+        client.send_describe_keyspace(keyspace);
+        KsDef ksDef = client.recv_describe_keyspace();
+        return ksDef.cf_defs;
+    }
+
+    public String createColumnFamily(String keyspace, String name) throws TException, SchemaDisagreementException, InvalidRequestException {
+        CfDef cfDef = new CfDef();
+        cfDef.name = name;
+        cfDef.keyspace = keyspace;
+
+        client.send_set_keyspace(keyspace);
+        client.recv_set_keyspace();
+
+        client.send_system_add_column_family(cfDef);
+        String s = client.recv_system_add_column_family();
+        return s;
     }
 }
