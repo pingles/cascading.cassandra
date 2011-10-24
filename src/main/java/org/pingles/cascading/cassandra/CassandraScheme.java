@@ -11,14 +11,18 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.rmi.runtime.Log;
 
 import java.io.IOException;
 
 public class CassandraScheme extends Scheme {
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraScheme.class);
 
-    public CassandraScheme(Fields keyFields, Fields valueFields) {
+    /**
+     * Creates a {@link Scheme} for dealing with a regular Column Family.
+     * @param keyFields     the fields to use for the row key
+     * @param nameFields    column names
+     */
+    public CassandraScheme(Fields keyFields, Fields nameFields) {
     }
 
     @Override

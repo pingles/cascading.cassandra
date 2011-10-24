@@ -223,6 +223,28 @@
         <root url="jar://$MAVEN_REPOSITORY$/cascading/cascading-core/1.2.4/cascading-core-1.2.4-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: com.ecyrd.speed4j:speed4j:0.9">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/ecyrd/speed4j/speed4j/0.9/speed4j-0.9.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/com/ecyrd/speed4j/speed4j/0.9/speed4j-0.9-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/ecyrd/speed4j/speed4j/0.9/speed4j-0.9-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: com.github.stephenc.eaio-uuid:uuid:3.2.0">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/github/stephenc/eaio-uuid/uuid/3.2.0/uuid-3.2.0.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/com/github/stephenc/eaio-uuid/uuid/3.2.0/uuid-3.2.0-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/com/github/stephenc/eaio-uuid/uuid/3.2.0/uuid-3.2.0-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: com.github.stephenc.high-scale-lib:high-scale-lib:1.1.2">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/com/github/stephenc/high-scale-lib/high-scale-lib/1.1.2/high-scale-lib-1.1.2.jar!/" />
@@ -366,6 +388,17 @@
         <root url="jar://$MAVEN_REPOSITORY$/commons-net/commons-net/1.4.1/commons-net-1.4.1-sources.jar!/" />
       </SOURCES>
     </library>
+    <library name="Maven: commons-pool:commons-pool:1.5.3">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/commons-pool/commons-pool/1.5.3/commons-pool-1.5.3.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/commons-pool/commons-pool/1.5.3/commons-pool-1.5.3-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/commons-pool/commons-pool/1.5.3/commons-pool-1.5.3-sources.jar!/" />
+      </SOURCES>
+    </library>
     <library name="Maven: hsqldb:hsqldb:1.8.0.7">
       <CLASSES>
         <root url="jar://$MAVEN_REPOSITORY$/hsqldb/hsqldb/1.8.0.7/hsqldb-1.8.0.7.jar!/" />
@@ -441,6 +474,17 @@
       </JAVADOC>
       <SOURCES>
         <root url="jar://$MAVEN_REPOSITORY$/log4j/log4j/1.2.16/log4j-1.2.16-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: me.prettyprint:hector-core:0.8.0-3">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/me/prettyprint/hector-core/0.8.0-3/hector-core-0.8.0-3.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/me/prettyprint/hector-core/0.8.0-3/hector-core-0.8.0-3-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/me/prettyprint/hector-core/0.8.0-3/hector-core-0.8.0-3-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: net.java.dev.jets3t:jets3t:0.6.1">
@@ -740,48 +784,6 @@
         <root url="jar://$MAVEN_REPOSITORY$/xmlenc/xmlenc/0.52/xmlenc-0.52-sources.jar!/" />
       </SOURCES>
     </library>
-  </component>
-  <component name="masterDetails">
-    <states>
-      <state key="ArtifactsStructureConfigurable.UI">
-        <settings>
-          <artifact-editor />
-          <splitter-proportions />
-        </settings>
-      </state>
-      <state key="FacetStructureConfigurable.UI">
-        <settings>
-          <splitter-proportions />
-        </settings>
-      </state>
-      <state key="GlobalLibrariesConfigurable.UI">
-        <settings>
-          <splitter-proportions />
-        </settings>
-      </state>
-      <state key="ModuleStructureConfigurable.UI">
-        <settings>
-          <splitter-proportions />
-        </settings>
-      </state>
-      <state key="ProjectJDKs.UI">
-        <settings>
-          <last-edited>1.6</last-edited>
-          <splitter-proportions>
-            <option name="proportions">
-              <list>
-                <option value="0.2" />
-              </list>
-            </option>
-          </splitter-proportions>
-        </settings>
-      </state>
-      <state key="ProjectLibrariesConfigurable.UI">
-        <settings>
-          <splitter-proportions />
-        </settings>
-      </state>
-    </states>
   </component>
 </project>
 

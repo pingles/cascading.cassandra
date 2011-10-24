@@ -6,6 +6,7 @@ import cascading.tap.hadoop.TapCollector;
 import cascading.tap.hadoop.TapIterator;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import org.apache.cassandra.hadoop.ConfigHelper;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
@@ -20,16 +21,22 @@ public class CassandraTap extends Tap {
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraScheme.class);
 
     private static final String SCHEME = "cassandra";
+    private final String initialAddress;
+    private final Integer rpcPort;
     private String columnFamilyName;
+    private String keyspace;
 
-    public CassandraTap(String columnFamilyName, CassandraScheme scheme) {
+    public CassandraTap(String initialAddress, Integer rpcPort, String keyspace, String columnFamilyName, CassandraScheme scheme) {
         super(scheme, SinkMode.APPEND);
+        this.initialAddress = initialAddress;
+        this.rpcPort = rpcPort;
         this.columnFamilyName = columnFamilyName;
+        this.keyspace = keyspace;
     }
 
     private URI getUri() {
         try {
-            return new URI(SCHEME, columnFamilyName, null);
+            return new URI(SCHEME, keyspace, columnFamilyName, null);
         } catch (URISyntaxException e) {
             return null;
         }
@@ -39,6 +46,10 @@ public class CassandraTap extends Tap {
     public void sinkInit(JobConf conf) throws IOException {
         LOGGER.info("Sinking to column family: {}", columnFamilyName);
         super.sinkInit(conf);
+        ConfigHelper.setOutputColumnFamily(conf, keyspace, columnFamilyName);
+        ConfigHelper.setPartitioner(conf, "org.apache.cassandra.dht.RandomPartitioner");
+        ConfigHelper.setInitialAddress(conf, this.initialAddress);
+        ConfigHelper.setRpcPort(conf, this.rpcPort.toString());
     }
 
     @Override

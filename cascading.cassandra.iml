@@ -61,6 +61,10 @@
     <orderEntry type="library" name="Maven: net.java.dev.jets3t:jets3t:0.6.1" level="project" />
     <orderEntry type="library" name="Maven: hsqldb:hsqldb:1.8.0.7" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jdt:core:3.1.1" level="project" />
+    <orderEntry type="library" name="Maven: me.prettyprint:hector-core:0.8.0-3" level="project" />
+    <orderEntry type="library" name="Maven: commons-pool:commons-pool:1.5.3" level="project" />
+    <orderEntry type="library" name="Maven: com.github.stephenc.eaio-uuid:uuid:3.2.0" level="project" />
+    <orderEntry type="library" name="Maven: com.ecyrd.speed4j:speed4j:0.9" level="project" />
   </component>
 </module>
 
