@@ -44,7 +44,7 @@ public class CassandraSchemeTest extends CassandraTest {
         // create flow to read from local file and insert into HBase
         Tap source = new Lfs(new TextLine(), inputFile);
         Pipe parsePipe = new Each("insert", new Fields("line"), new RegexSplitter(new Fields("num", "lower", "upper"), " "));
-        Fields keyFields = new Fields( "num" );
+        Fields keyFields = new Fields("num");
         Fields valueFields = new Fields("lower", "upper");
 
         Tap sink = new CassandraTap(getRpcHost(), getRpcPort(), "TestKeyspace", "TestColumnFamily", new CassandraScheme(keyFields, valueFields));
