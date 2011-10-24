@@ -20,14 +20,16 @@ import java.util.Map;
 
 public class CassandraSchemeTest extends CassandraTest {
     private String inputFile = "./src/test/data/small.txt";
+    private final String keyspaceName = "TestKeyspace";
+    private final String columnFamilyName = "TestColumnFamily";
 
     @Override
     public void setUp() throws Exception {
         super.setUp();
         CassandraClient client = new CassandraClient(getRpcHost(), getRpcPort());
         client.open();
-        if (!client.keyspaceExists("TestKeyspace")) {
-            client.createKeyspace("TestKeyspace");
+        if (!client.keyspaceExists(keyspaceName)) {
+            client.createKeyspace(keyspaceName);
         }
         client.close();
     }
@@ -47,7 +49,7 @@ public class CassandraSchemeTest extends CassandraTest {
         Fields keyFields = new Fields("num");
         Fields valueFields = new Fields("lower", "upper");
 
-        Tap sink = new CassandraTap(getRpcHost(), getRpcPort(), "TestKeyspace", "TestColumnFamily", new CassandraScheme(keyFields, valueFields));
+        Tap sink = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, new CassandraScheme(keyFields, valueFields));
 
         Flow parseFlow = new FlowConnector(properties).connect(source, sink, parsePipe);
         parseFlow.complete();
