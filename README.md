@@ -24,7 +24,7 @@ First, create a `CassandraScheme` and specify the field to be used as the row ke
 
 Finally, hook the `CassandraScheme` into a `CassandraTap` and provide the Cassandra Thrift RPC Host and Port that the `ColumnFamilyOutputFormat` should connect to, as well as the keyspace and column family names you wish to store values for.
 
-Tap sink = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
+    Tap sink = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
 
 ## License
 
