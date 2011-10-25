@@ -80,10 +80,9 @@ public class CassandraClient {
         transport.close();
     }
 
-    public boolean keyspaceExists(String keyspaceName) throws TException, InvalidRequestException {
-        List<KsDef> keyspaces = describeKeyspaces();
-        for (KsDef ksDef : keyspaces) {
-            if (ksDef.name.equals(keyspaceName)) {
+    public boolean keyspaceExists(String name) throws TException, InvalidRequestException {
+        for (KsDef ksDef : describeKeyspaces()) {
+            if (ksDef.name.equals(name)) {
                 return true;
             }
         }
@@ -91,8 +90,7 @@ public class CassandraClient {
     }
 
     public boolean columnFamilyExists(String keyspace, String columnFamily) throws TException, NotFoundException, InvalidRequestException {
-        List<CfDef> columnFamilies = listColumnFamilies(keyspace);
-        for (CfDef cfDef : columnFamilies) {
+        for (CfDef cfDef : listColumnFamilies(keyspace)) {
             if (cfDef.name.equals(columnFamily)) {
                 return true;
             }
