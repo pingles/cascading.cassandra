@@ -13,18 +13,11 @@ import org.apache.cassandra.thrift.Mutation;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 public class CassandraScheme extends Scheme {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CassandraScheme.class);
     private final Fields keyField;
     private final Fields[] columnFields;
 
@@ -57,11 +50,10 @@ public class CassandraScheme extends Scheme {
     @Override
     public void sink(TupleEntry tupleEntry, OutputCollector outputCollector) throws IOException {
         Tuple key = tupleEntry.selectTuple(keyField);
-        TypeInferringSerializer serializer = TypeInferringSerializer.get();
+        TypeInferringSerializer<Object> serializer = TypeInferringSerializer.get();
         byte[] keyBytes = serializer.toBytes(key.get(0));
 
-        for (int i = 0; i < columnFields.length; i++) {
-            Fields selector = columnFields[i];
+        for (Fields selector : columnFields) {
             TupleEntry values = tupleEntry.selectEntry(selector);
 
             for (int j = 0; j < values.getFields().size(); j++) {

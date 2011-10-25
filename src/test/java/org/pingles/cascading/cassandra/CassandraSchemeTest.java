@@ -22,8 +22,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
@@ -33,10 +31,8 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(JUnit4.class)
 public class CassandraSchemeTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CassandraSchemeTest.class);
     private static EmbeddedCassandraService cassandra;
 
-    private String inputFile = "./src/test/data/small.txt";
     private final String keyspaceName = "TestKeyspace";
     private final String columnFamilyName = "TestColumnFamily";
     transient private static Map<Object, Object> properties = new HashMap<Object, Object>();
@@ -67,6 +63,7 @@ public class CassandraSchemeTest {
 
     @Test
     public void testInsertIntoCassandra() throws TException, TimedOutException, NotFoundException, InvalidRequestException, UnavailableException {
+        String inputFile = "./src/test/data/small.txt";
         Tap source = new Lfs(new TextLine(), inputFile);
         Pipe parsePipe = new Each("insert", new Fields("line"), new RegexSplitter(new Fields("num", "lower", "upper"), " "));
         Fields keyFields = new Fields("num");
@@ -78,8 +75,8 @@ public class CassandraSchemeTest {
         Flow parseFlow = new FlowConnector(properties).connect(source, sink, parsePipe);
         parseFlow.complete();
 
-        assertEquals("a", bytesToString(client.getValue(columnFamilyName, toBytes("1"), toBytes("lower"))));
-        assertEquals("A", bytesToString(client.getValue(columnFamilyName, toBytes("1"), toBytes("upper"))));
+        assertEquals("c", bytesToString(client.getValue(columnFamilyName, toBytes("1"), toBytes("lower"))));
+        assertEquals("C", bytesToString(client.getValue(columnFamilyName, toBytes("1"), toBytes("upper"))));
     }
 
     private String bytesToString(byte[] bytes) {

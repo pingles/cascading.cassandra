@@ -14,13 +14,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 
 public class CassandraTap extends Tap {
     private static final Logger LOGGER = LoggerFactory.getLogger(CassandraScheme.class);
-
     private static final String SCHEME = "cassandra";
+
     private final String initialAddress;
     private final Integer rpcPort;
     private String columnFamilyName;
@@ -55,7 +53,7 @@ public class CassandraTap extends Tap {
 
     @Override
     public Path getPath() {
-        return new Path(String.format("cassandra://%s:%d/%s/%s", initialAddress, rpcPort, keyspace, columnFamilyName));
+        return new Path(String.format("%s://%s:%d/%s/%s", SCHEME, initialAddress, rpcPort, keyspace, columnFamilyName));
     }
 
     @Override
