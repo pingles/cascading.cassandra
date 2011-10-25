@@ -8,6 +8,34 @@ The project can be built using [Maven](http://maven.apache.org) and installed in
 
     mvn install
 
+Alternatively, there's a snapshot available from [Conjars](http://conjars.org/cascading.pingles/cascading.cassandra).
+
+### Leiningen
+
+    [cascading.pingles/cascading.cassandra "0.0.1-SNAPSHOT"]
+    
+and add the repository into your `project.clj` with
+
+    :repositories {"conjars" "http://conjars.org/repo"}
+
+### Maven
+
+    <dependency>
+      <groupId>cascading.pingles</groupId>
+      <artifactId>cascading.cassandra</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
+
+If you haven't already added it you'll need to add the Conjars repository
+
+    <repositories>
+      <repository>
+        <id>conjars</id>
+        <url>http://conjars.org/repo</url>
+      </repository>
+    </repositories>
+
+
 ## Restrictions
 
 This is very much an early Work-in-Progress. The Tap can only be used as a sink and only supports regular column families (it won't work with Super-Columns or Counter Columns).
