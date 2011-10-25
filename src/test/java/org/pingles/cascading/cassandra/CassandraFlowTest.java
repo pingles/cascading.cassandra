@@ -30,7 +30,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(JUnit4.class)
-public class CassandraSchemeTest {
+public class CassandraFlowTest {
     private static EmbeddedCassandraService cassandra;
 
     private final String keyspaceName = "TestKeyspace";

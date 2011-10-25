@@ -4,7 +4,6 @@ import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.SchemaDisagreementException;
 import org.apache.thrift.TException;
-import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -14,7 +13,7 @@ import java.io.FileReader;
 import java.util.Map;
 
 public class CassandraTestUtil {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CassandraSchemeTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(CassandraFlowTest.class);
     private static final String CASSANDRA_YAML = "./src/test/resources/cassandra.yaml";
 
     public static void ensureKeyspace(String name) throws TException, InterruptedException, InvalidRequestException, SchemaDisagreementException {
