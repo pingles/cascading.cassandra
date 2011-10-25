@@ -2,7 +2,9 @@ package org.pingles.cascading.cassandra;
 
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.CfDef;
+import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
+import org.apache.cassandra.thrift.ColumnParent;
 import org.apache.cassandra.thrift.ColumnPath;
 import org.apache.cassandra.thrift.ConsistencyLevel;
 import org.apache.cassandra.thrift.InvalidRequestException;
@@ -123,5 +125,19 @@ public class CassandraClient {
 
         ColumnOrSuperColumn columnOrSuperColumn = client.get(keyBytes, cp, ConsistencyLevel.ONE);
         return columnOrSuperColumn.column.getValue();
+    }
+
+    public void put(String columnFamilyName, ByteBuffer key, ByteBuffer name, ByteBuffer value) throws TException, TimedOutException, InvalidRequestException, UnavailableException {
+        ColumnParent columnParent = new ColumnParent(columnFamilyName);
+        Column column = new Column(name);
+        column.setTimestamp(System.currentTimeMillis());
+        column.setValue(value);
+
+        client.insert(key, columnParent, column, ConsistencyLevel.ONE);
+    }
+
+    public void useKeyspace(String keyspaceName) throws TException, InvalidRequestException {
+        client.send_set_keyspace(keyspaceName);
+        client.recv_set_keyspace();
     }
 }

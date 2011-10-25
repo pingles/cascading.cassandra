@@ -8,7 +8,9 @@ import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.cassandra.hadoop.ConfigHelper;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.JobConf;
+import org.pingles.cascading.cassandra.hadoop.ColumnFamilyInputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
@@ -46,6 +48,13 @@ public class CassandraTap extends Tap {
     @Override
     public void sourceInit(JobConf conf) throws IOException {
         LOGGER.info("Sourcing from column family: {}", columnFamilyName);
+
+        FileInputFormat.addInputPaths(conf, getPath().toString());
+        conf.setInputFormat(ColumnFamilyInputFormat.class);
+        ConfigHelper.setInputColumnFamily(conf, keyspace, columnFamilyName);
+        ConfigHelper.setInitialAddress(conf, initialAddress);
+        ConfigHelper.setRpcPort(conf, rpcPort.toString());
+
         super.sourceInit(conf);
     }
 
