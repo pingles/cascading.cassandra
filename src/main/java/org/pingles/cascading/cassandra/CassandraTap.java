@@ -7,12 +7,10 @@ import cascading.tap.hadoop.TapIterator;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
 import org.apache.cassandra.hadoop.ConfigHelper;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.JobConf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.IOException;
 
 public class CassandraTap extends Tap {
@@ -68,21 +66,21 @@ public class CassandraTap extends Tap {
 
     @Override
     public boolean makeDirs(JobConf jobConf) throws IOException {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException("makeDirs unsupported with Cassandra.");
     }
 
     @Override
     public boolean deletePath(JobConf jobConf) throws IOException {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException("deletePath unsupported with Cassandra.");
     }
 
     @Override
     public boolean pathExists(JobConf jobConf) throws IOException {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException("pathExists unsupported with Cassandra.");
     }
 
     @Override
     public long getPathModified(JobConf jobConf) throws IOException {
-        throw new NotImplementedException();
+        throw new UnsupportedOperationException("getPathModified unsupported with Cassandra.");
     }
 }
