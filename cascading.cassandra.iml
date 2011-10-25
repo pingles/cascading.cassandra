@@ -44,24 +44,26 @@
     <orderEntry type="library" name="Maven: commons-logging:commons-logging:1.0.4" level="project" />
     <orderEntry type="library" name="Maven: org.apache.cassandra:cassandra-thrift:0.8.7" level="project" />
     <orderEntry type="library" name="Maven: com.github.stephenc:jamm:0.2.2" level="project" />
-    <orderEntry type="library" name="Maven: cascading:cascading-core:1.2.4" level="project" />
-    <orderEntry type="library" name="Maven: thirdparty:jgrapht-jdk1.6:0.8.1" level="project" />
+    <orderEntry type="library" name="Maven: cascading:cascading-core:2.0.0-wip-147" level="project" />
     <orderEntry type="library" name="Maven: riffle:riffle:0.1-dev" level="project" />
+    <orderEntry type="library" name="Maven: thirdparty:jgrapht-jdk1.6:0.8.1" level="project" />
     <orderEntry type="library" name="Maven: org.codehaus.janino:janino:2.5.16" level="project" />
+    <orderEntry type="library" name="Maven: cascading:cascading-local:2.0.0-wip-147" level="project" />
+    <orderEntry type="library" name="Maven: cascading:cascading-hadoop:2.0.0-wip-147" level="project" />
     <orderEntry type="library" name="Maven: org.apache.hadoop:hadoop-core:0.20.2-cdh3u2" level="project" />
     <orderEntry type="library" name="Maven: xmlenc:xmlenc:0.52" level="project" />
     <orderEntry type="library" name="Maven: commons-httpclient:commons-httpclient:3.1" level="project" />
     <orderEntry type="library" name="Maven: commons-net:commons-net:1.4.1" level="project" />
     <orderEntry type="library" name="Maven: oro:oro:2.0.8" level="project" />
     <orderEntry type="library" name="Maven: tomcat:jasper-runtime:5.5.23" level="project" />
-    <orderEntry type="library" name="Maven: commons-el:commons-el:1.0" level="project" />
     <orderEntry type="library" name="Maven: tomcat:jasper-compiler:5.5.23" level="project" />
-    <orderEntry type="library" name="Maven: javax.servlet:jsp-api:2.0" level="project" />
+    <orderEntry type="library" name="Maven: org.eclipse.jdt:core:3.1.1" level="project" />
     <orderEntry type="library" name="Maven: ant:ant:1.6.5" level="project" />
-    <orderEntry type="library" name="Maven: javax.servlet.jsp:jsp-api:2.1" level="project" />
+    <orderEntry type="library" name="Maven: commons-el:commons-el:1.0" level="project" />
     <orderEntry type="library" name="Maven: net.java.dev.jets3t:jets3t:0.6.1" level="project" />
     <orderEntry type="library" name="Maven: hsqldb:hsqldb:1.8.0.7" level="project" />
-    <orderEntry type="library" name="Maven: org.eclipse.jdt:core:3.1.1" level="project" />
+    <orderEntry type="library" name="Maven: javax.servlet:jsp-api:2.0" level="project" />
+    <orderEntry type="library" name="Maven: javax.servlet.jsp:jsp-api:2.1" level="project" />
     <orderEntry type="library" name="Maven: me.prettyprint:hector-core:0.8.0-3" level="project" />
     <orderEntry type="library" name="Maven: commons-pool:commons-pool:1.5.3" level="project" />
     <orderEntry type="library" name="Maven: com.github.stephenc.eaio-uuid:uuid:3.2.0" level="project" />

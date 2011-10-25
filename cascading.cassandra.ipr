@@ -219,7 +219,7 @@
   <component name="ProjectResources">
     <default-html-doctype>http://www.w3.org/1999/xhtml</default-html-doctype>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_5" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_6" assert-keyword="true" jdk-15="true" project-jdk-name="1.6" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/classes" />
   </component>
   <component name="VcsDirectoryMappings">
@@ -248,15 +248,37 @@
         <root url="jar://$MAVEN_REPOSITORY$/antlr/antlr/2.7.7/antlr-2.7.7-sources.jar!/" />
       </SOURCES>
     </library>
-    <library name="Maven: cascading:cascading-core:1.2.4">
+    <library name="Maven: cascading:cascading-core:2.0.0-wip-147">
       <CLASSES>
-        <root url="jar://$MAVEN_REPOSITORY$/cascading/cascading-core/1.2.4/cascading-core-1.2.4.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/cascading/cascading-core/2.0.0-wip-147/cascading-core-2.0.0-wip-147.jar!/" />
       </CLASSES>
       <JAVADOC>
-        <root url="jar://$MAVEN_REPOSITORY$/cascading/cascading-core/1.2.4/cascading-core-1.2.4-javadoc.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/cascading/cascading-core/2.0.0-wip-147/cascading-core-2.0.0-wip-147-javadoc.jar!/" />
       </JAVADOC>
       <SOURCES>
-        <root url="jar://$MAVEN_REPOSITORY$/cascading/cascading-core/1.2.4/cascading-core-1.2.4-sources.jar!/" />
+        <root url="jar://$MAVEN_REPOSITORY$/cascading/cascading-core/2.0.0-wip-147/cascading-core-2.0.0-wip-147-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: cascading:cascading-hadoop:2.0.0-wip-147">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/cascading/cascading-hadoop/2.0.0-wip-147/cascading-hadoop-2.0.0-wip-147.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/cascading/cascading-hadoop/2.0.0-wip-147/cascading-hadoop-2.0.0-wip-147-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/cascading/cascading-hadoop/2.0.0-wip-147/cascading-hadoop-2.0.0-wip-147-sources.jar!/" />
+      </SOURCES>
+    </library>
+    <library name="Maven: cascading:cascading-local:2.0.0-wip-147">
+      <CLASSES>
+        <root url="jar://$MAVEN_REPOSITORY$/cascading/cascading-local/2.0.0-wip-147/cascading-local-2.0.0-wip-147.jar!/" />
+      </CLASSES>
+      <JAVADOC>
+        <root url="jar://$MAVEN_REPOSITORY$/cascading/cascading-local/2.0.0-wip-147/cascading-local-2.0.0-wip-147-javadoc.jar!/" />
+      </JAVADOC>
+      <SOURCES>
+        <root url="jar://$MAVEN_REPOSITORY$/cascading/cascading-local/2.0.0-wip-147/cascading-local-2.0.0-wip-147-sources.jar!/" />
       </SOURCES>
     </library>
     <library name="Maven: com.ecyrd.speed4j:speed4j:0.9">

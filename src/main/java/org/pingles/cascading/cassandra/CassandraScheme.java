@@ -7,22 +7,32 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import org.apache.cassandra.hadoop.ColumnFamilyOutputFormat;
+import org.apache.cassandra.hadoop.ConfigHelper;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.Mutation;
+import org.apache.cassandra.thrift.SlicePredicate;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.logging.Logger;
 
 public class CassandraScheme extends Scheme {
-    private final Fields keyField;
+    private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CassandraScheme.class);
+
+    private Fields keyField;
     private final Fields[] columnFields;
 
     /**
-     * Creates a {@link Scheme} for dealing with a regular Column Family.
+     * Creates a {@link Scheme} for dealing with a regular Column Family. Suitable
+     * for using CassandraScheme as a sink.
      * @param keyField      the field to use for the row key
      * @param columnFields  column names
      */
@@ -31,8 +41,24 @@ public class CassandraScheme extends Scheme {
         this.columnFields = columnFields;
     }
 
+    public CassandraScheme(Fields[] columnFields) {
+        this.columnFields = columnFields;
+    }
+
     @Override
     public void sourceInit(Tap tap, JobConf jobConf) throws IOException {
+        List<ByteBuffer> columnNames = new ArrayList<ByteBuffer>();
+
+        for (int i = 0; i < columnFields.length; i++) {
+            Fields f = columnFields[i];
+            Object columnName = f.get(0);
+            LOGGER.info("Adding input column name: {}", columnName);
+            columnNames.add(TypeInferringSerializer.get().toByteBuffer(columnName));
+        }
+
+        SlicePredicate predicate = new SlicePredicate();
+        predicate.setColumn_names(columnNames);
+        ConfigHelper.setInputSlicePredicate(jobConf, predicate);
     }
 
     @Override
