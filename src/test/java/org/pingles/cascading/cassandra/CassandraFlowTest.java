@@ -62,7 +62,7 @@ public class CassandraFlowTest {
     }
 
     @Test
-    public void testInsertIntoCassandra() throws TException, TimedOutException, NotFoundException, InvalidRequestException, UnavailableException {
+    public void testCassandraAsSink() throws Exception {
         String inputFile = "./src/test/data/small.txt";
         Tap source = new Lfs(new TextLine(), inputFile);
         Pipe parsePipe = new Each("insert", new Fields("line"), new RegexSplitter(new Fields("num", "lower", "upper"), " "));
@@ -75,8 +75,14 @@ public class CassandraFlowTest {
         Flow parseFlow = new FlowConnector(properties).connect(source, sink, parsePipe);
         parseFlow.complete();
 
-        assertEquals("c", bytesToString(client.getValue(columnFamilyName, toBytes("1"), toBytes("lower"))));
-        assertEquals("C", bytesToString(client.getValue(columnFamilyName, toBytes("1"), toBytes("upper"))));
+        assertEquals("a", getTestBytes("1", "lower"));
+        assertEquals("A", getTestBytes("1", "upper"));
+        assertEquals("b", getTestBytes("2", "lower"));
+        assertEquals("B", getTestBytes("2", "upper"));
+    }
+
+    private String getTestBytes(String key, String name) throws Exception {
+        return bytesToString(client.getValue(columnFamilyName, toBytes(key), toBytes(name)));
     }
 
     private String bytesToString(byte[] bytes) {
