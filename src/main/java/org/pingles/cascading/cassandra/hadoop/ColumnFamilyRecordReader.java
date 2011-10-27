@@ -28,12 +28,15 @@ import org.apache.cassandra.thrift.TBinaryProtocol;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.cassandra.utils.FBUtilities;
 import org.apache.cassandra.utils.Pair;
+import org.apache.commons.collections.MapUtils;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.thrift.TException;
 import org.apache.thrift.transport.TFramedTransport;
 import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransportException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -46,6 +49,8 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class ColumnFamilyRecordReader implements RecordReader<ByteBuffer, SortedMap<ByteBuffer, IColumn>> {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ColumnFamilyInputFormat.class);
+
     private final ColumnFamilySplit inputSplit;
     private final JobConf jobConf;
     private final SlicePredicate predicate;
@@ -60,6 +65,7 @@ public class ColumnFamilyRecordReader implements RecordReader<ByteBuffer, Sorted
     private Pair<ByteBuffer, SortedMap<ByteBuffer, IColumn>> currentRow;
     private int rpcPort;
     private ColumnFamilyRecordReader.RowIterator rowIterator;
+    private ByteBuffer keyBytesBuffer;
 
     public ColumnFamilyRecordReader(ColumnFamilySplit inputSplit, JobConf jobConf) {
         this.inputSplit = inputSplit;
@@ -73,6 +79,7 @@ public class ColumnFamilyRecordReader implements RecordReader<ByteBuffer, Sorted
         this.keyspace = ConfigHelper.getInputKeyspace(jobConf);
         this.initialAddress = ConfigHelper.getInitialAddress(jobConf);
         this.rpcPort = ConfigHelper.getRpcPort(jobConf);
+        this.keyBytesBuffer = ByteBuffer.allocate(4096);
 
         try {
             this.client = createClient();
@@ -115,15 +122,23 @@ public class ColumnFamilyRecordReader implements RecordReader<ByteBuffer, Sorted
         return c;
     }
 
-    public boolean next(ByteBuffer byteBuffer, SortedMap<ByteBuffer, IColumn> byteBufferIColumnSortedMap) throws IOException {
+    public boolean next(ByteBuffer keyBuffer, SortedMap<ByteBuffer, IColumn> valueMap) throws IOException {
         if (!rowIterator.hasNext())
             return false;
         currentRow = rowIterator.next();
+
+        ByteBuffer currentKey = currentRow.left;
+        SortedMap<ByteBuffer, IColumn> currentValue = currentRow.right;
+
+        ByteBufferUtil.arrayCopy(currentKey, 0, keyBytesBuffer.array(), 0, currentKey.array().length);
+        valueMap.clear();
+        valueMap.putAll(currentValue);
+
         return true;
     }
 
     public ByteBuffer createKey() {
-        return ByteBufferUtil.EMPTY_BYTE_BUFFER;
+        return keyBytesBuffer;
     }
 
     private SortedMap<ByteBuffer, IColumn> emptyMap() {

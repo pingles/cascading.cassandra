@@ -21,6 +21,7 @@ import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.rmi.runtime.Log;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -139,5 +140,11 @@ public class CassandraClient {
     public void useKeyspace(String keyspaceName) throws TException, InvalidRequestException {
         client.send_set_keyspace(keyspaceName);
         client.recv_set_keyspace();
+    }
+
+    public void truncate(String columnFamilyName) throws TException, InvalidRequestException, UnavailableException {
+        LOGGER.info("Truncating {}", columnFamilyName);
+        client.send_truncate(columnFamilyName);
+        client.recv_truncate();
     }
 }

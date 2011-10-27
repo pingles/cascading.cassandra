@@ -2,7 +2,13 @@ package org.pingles.cascading.cassandra;
 
 import cascading.flow.Flow;
 import cascading.flow.FlowConnector;
+import cascading.flow.FlowProcess;
+import cascading.operation.BaseOperation;
+import cascading.operation.Filter;
+import cascading.operation.Function;
+import cascading.operation.FunctionCall;
 import cascading.operation.Identity;
+import cascading.operation.OperationCall;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
 import cascading.pipe.Pipe;
@@ -11,12 +17,16 @@ import cascading.tap.Lfs;
 import cascading.tap.SinkMode;
 import cascading.tap.Tap;
 import cascading.tuple.Fields;
+import cascading.tuple.TupleEntry;
+import cascading.tuple.TupleEntryCollector;
+import cascading.tuple.Tuples;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import org.apache.cassandra.service.EmbeddedCassandraService;
 import org.apache.cassandra.thrift.InvalidRequestException;
 import org.apache.cassandra.thrift.NotFoundException;
 import org.apache.cassandra.thrift.TimedOutException;
 import org.apache.cassandra.thrift.UnavailableException;
+import org.apache.commons.lang.StringUtils;
 import org.apache.thrift.TException;
 import org.junit.After;
 import org.junit.Before;
@@ -24,6 +34,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -34,6 +45,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import static org.junit.Assert.assertEquals;
 
@@ -66,8 +78,12 @@ public class CassandraFlowTest {
     }
 
     @After
-    public void afterTest() {
-        client.close();
+    public void afterTest() throws TException, InvalidRequestException, UnavailableException {
+        try {
+            client.truncate(columnFamilyName);
+        } finally {
+            client.close();
+        }
     }
 
     @Test
@@ -97,22 +113,19 @@ public class CassandraFlowTest {
         client.put(columnFamilyName, toBytes("22"), toBytes("lower"), toBytes("b"));
         client.put(columnFamilyName, toBytes("22"), toBytes("upper"), toBytes("B"));
 
-        Fields[] nameFields = new Fields[] {new Fields("lower"), new Fields("upper")};
+//        Fields[] nameFields = new Fields[] {new Fields("lower"), new Fields("upper")};
 
-        CassandraScheme scheme = new CassandraScheme(nameFields);
+        CassandraScheme scheme = new CassandraScheme(new Fields("lower", "upper"));
         Tap source = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
         Tap sink = new Lfs(new TextLine(), "./tmp/test/cassandraAsSourceOutput.txt", SinkMode.REPLACE);
-        Pipe copyPipe = new Each("read", new Identity());
+        Pipe copyPipe = new Each("read", new ByteBufferToString(new Fields("lower", "upper")));
         Flow copyFlow = new FlowConnector(properties).connect(source, sink, copyPipe);
         copyFlow.complete();
 
         List<String> outputContents = readLines("./tmp/test/cassandraAsSourceOutput.txt/part-00000");
         assertEquals(2, outputContents.size());
-        assertEquals("", outputContents.get(0));
-        assertEquals("", outputContents.get(1));
-
-//        assertEquals("a", getTestBytes("1", "lower"));
-//        assertEquals("A", getTestBytes("1", "upper"));
+        assertEquals("a\tA", outputContents.get(0));
+        assertEquals("b\tB", outputContents.get(1));
     }
 
     private List<String> readLines(String fileName) throws IOException {

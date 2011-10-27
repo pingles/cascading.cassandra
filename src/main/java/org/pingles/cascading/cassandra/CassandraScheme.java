@@ -5,13 +5,16 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
+import com.sun.source.tree.Tree;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
+import org.apache.cassandra.db.IColumn;
 import org.apache.cassandra.hadoop.ColumnFamilyOutputFormat;
 import org.apache.cassandra.hadoop.ConfigHelper;
 import org.apache.cassandra.thrift.Column;
 import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
@@ -19,14 +22,18 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class CassandraScheme extends Scheme {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CassandraScheme.class);
     private Fields keyField;
-    private final Fields[] columnFields;
+    private Fields[] columnFields;
+    private Fields nameFields;
 
     /**
      * Creates a {@link Scheme} for dealing with a regular Column Family.
@@ -38,16 +45,16 @@ public class CassandraScheme extends Scheme {
         this.columnFields = columnFields;
     }
 
-    public CassandraScheme(Fields[] nameFields) {
-        this.columnFields = nameFields;
+    public CassandraScheme(Fields fields) {
+        this.nameFields = fields;
     }
 
     @Override
     public void sourceInit(Tap tap, JobConf jobConf) throws IOException {
         List<ByteBuffer> columnNames = new ArrayList<ByteBuffer>();
-        for (int i = 0; i < columnFields.length; i++) {
-            Fields f = columnFields[i];
-            Object columnName = f.get(0);
+
+        for (int i = 0; i < nameFields.size(); i++) {
+            Object columnName = nameFields.get(i);
             LOGGER.info("Adding input column name: {}", columnName);
             columnNames.add(TypeInferringSerializer.get().toByteBuffer(columnName));
         }
@@ -65,10 +72,33 @@ public class CassandraScheme extends Scheme {
 
     @Override
     public Tuple source(Object key, Object value) {
-        Tuple result = new Tuple();
-        result.add(key);
-        result.add(value);
-        return result;
+        Tuple t = new Tuple();
+        SortedMap<ByteBuffer, IColumn> values = (SortedMap<ByteBuffer, IColumn>) value;
+
+        for (IColumn col : values.values()) {
+            try {
+                LOGGER.info("n: {}", ByteBufferUtil.string(col.name()));
+            } catch (CharacterCodingException e) {
+                throw new RuntimeException(e);
+            }
+            t.add(col.value());
+        }
+
+        // should pull column name as byte buffer selection from name fields?
+//        int i = 0;
+//        for (ByteBuffer n : values.keySet()) {
+//            try {
+//                LOGGER.info("n: {}", ByteBufferUtil.string(n));
+//            } catch (CharacterCodingException e) {
+//                throw new RuntimeException(e);
+//            }
+//
+//            IColumn column = values.get(n);
+//            tupleEntry.set(i, "test");
+//            i++;
+//        }
+
+        return t;
     }
 
     @Override
