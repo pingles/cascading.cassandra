@@ -130,15 +130,13 @@ public class CassandraFlowTest {
     public void testSourceSpecifyingColumnNames() throws Exception {
         client.put(columnFamilyName, toBytes("21"), toBytes("lower"), toBytes("a"));
         client.put(columnFamilyName, toBytes("21"), toBytes("upper"), toBytes("A"));
-        client.put(columnFamilyName, toBytes("21"), toBytes("number"), toBytes(3));
         client.put(columnFamilyName, toBytes("22"), toBytes("lower"), toBytes("b"));
         client.put(columnFamilyName, toBytes("22"), toBytes("upper"), toBytes("B"));
-        client.put(columnFamilyName, toBytes("22"), toBytes("number"), toBytes(5));
 
         CassandraScheme scheme = new CassandraScheme(new Fields("lower", "upper"));
         Tap source = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
         Tap sink = new Lfs(new TextLine(), "./tmp/test/cassandraAsSourceOutput.txt", SinkMode.REPLACE);
-        Pipe copyPipe = new Each("read", new ByteBufferToString(new Fields("lower", "upper")));
+        Pipe copyPipe = new Each("read", new Fields("lower"), new ByteBufferToString(new Fields("lower")));
         Flow copyFlow = new FlowConnector(properties).connect(source, sink, copyPipe);
         copyFlow.complete();
 
