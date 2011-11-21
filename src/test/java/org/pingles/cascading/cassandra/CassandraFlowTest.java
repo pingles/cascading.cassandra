@@ -113,7 +113,27 @@ public class CassandraFlowTest {
         client.put(columnFamilyName, toBytes("22"), toBytes("lower"), toBytes("b"));
         client.put(columnFamilyName, toBytes("22"), toBytes("upper"), toBytes("B"));
 
-//        Fields[] nameFields = new Fields[] {new Fields("lower"), new Fields("upper")};
+        CassandraScheme scheme = new CassandraScheme(new Fields("lower", "upper"));
+        Tap source = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
+        Tap sink = new Lfs(new TextLine(), "./tmp/test/cassandraAsSourceOutput.txt", SinkMode.REPLACE);
+        Pipe copyPipe = new Each("read", new ByteBufferToString(new Fields("lower", "upper")));
+        Flow copyFlow = new FlowConnector(properties).connect(source, sink, copyPipe);
+        copyFlow.complete();
+
+        List<String> outputContents = readLines("./tmp/test/cassandraAsSourceOutput.txt/part-00000");
+        assertEquals(2, outputContents.size());
+        assertEquals("a\tA", outputContents.get(0));
+        assertEquals("b\tB", outputContents.get(1));
+    }
+
+    @Test
+    public void testSourceSpecifyingColumnNames() throws Exception {
+        client.put(columnFamilyName, toBytes("21"), toBytes("lower"), toBytes("a"));
+        client.put(columnFamilyName, toBytes("21"), toBytes("upper"), toBytes("A"));
+        client.put(columnFamilyName, toBytes("21"), toBytes("number"), toBytes(3));
+        client.put(columnFamilyName, toBytes("22"), toBytes("lower"), toBytes("b"));
+        client.put(columnFamilyName, toBytes("22"), toBytes("upper"), toBytes("B"));
+        client.put(columnFamilyName, toBytes("22"), toBytes("number"), toBytes(5));
 
         CassandraScheme scheme = new CassandraScheme(new Fields("lower", "upper"));
         Tap source = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
