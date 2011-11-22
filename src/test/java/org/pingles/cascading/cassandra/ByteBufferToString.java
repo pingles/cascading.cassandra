@@ -15,16 +15,13 @@ import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 
 public class ByteBufferToString extends Identity {
-    private final Fields fields;
 
     public ByteBufferToString(Fields fields) {
         super(fields);
-        this.fields = fields;
     }
 
     @Override
     public void operate(FlowProcess flowProcess, FunctionCall functionCall) {
-//        TupleEntry input = functionCall.getArguments().selectEntry(fields);
         TupleEntry arguments = functionCall.getArguments();
         TupleEntryCollector outputCollector = functionCall.getOutputCollector();
 

@@ -52,7 +52,6 @@ import static org.junit.Assert.assertEquals;
 @RunWith(JUnit4.class)
 public class CassandraFlowTest {
     private static EmbeddedCassandraService cassandra;
-
     private final String keyspaceName = "TestKeyspace";
     private final String columnFamilyName = "TestColumnFamily";
     transient private static Map<Object, Object> properties = new HashMap<Object, Object>();
