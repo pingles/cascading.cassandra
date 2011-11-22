@@ -133,17 +133,21 @@ public class CassandraFlowTest {
         client.put(columnFamilyName, toBytes("22"), toBytes("lower"), toBytes("b"));
         client.put(columnFamilyName, toBytes("22"), toBytes("upper"), toBytes("B"));
 
-        CassandraScheme scheme = new CassandraScheme(new Fields("lower", "upper"));
+        Fields inputFields = new Fields("lower", "upper");
+        Fields outputFields = new Fields("upper");
+        CassandraScheme scheme = new CassandraScheme(inputFields);
         Tap source = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
         Tap sink = new Lfs(new TextLine(), "./tmp/test/cassandraAsSourceOutput.txt", SinkMode.REPLACE);
-        Pipe copyPipe = new Each("read", new Fields("lower"), new ByteBufferToString(new Fields("lower")));
+
+        Pipe copyPipe = new Each("read", new ByteBufferToString(inputFields), inputFields);
+        copyPipe = new Each(copyPipe, outputFields, new Identity());
         Flow copyFlow = new FlowConnector(properties).connect(source, sink, copyPipe);
         copyFlow.complete();
 
         List<String> outputContents = readLines("./tmp/test/cassandraAsSourceOutput.txt/part-00000");
         assertEquals(2, outputContents.size());
-        assertEquals("a\tA", outputContents.get(0));
-        assertEquals("b\tB", outputContents.get(1));
+        assertEquals("A", outputContents.get(0));
+        assertEquals("B", outputContents.get(1));
     }
 
     private List<String> readLines(String fileName) throws IOException {
