@@ -49,8 +49,8 @@ First, create a `CassandraScheme` and specify the field to be used as the row ke
 ### Using as a Sink
 
     Fields keyFields = new Fields("num");
-    Fields[] valueFields = new Fields[] {new Fields("lower"), new Fields("upper")};
-    CassandraScheme scheme = new CassandraScheme(keyFields, valueFields);
+    Fields nameFields = new Fields("lower", "upper");
+    CassandraScheme scheme = new CassandraScheme(keyFields, nameFields);
 
 Finally, hook the `CassandraScheme` into a `CassandraTap` and provide the Cassandra Thrift RPC Host and Port that the `ColumnFamilyOutputFormat` should connect to, as well as the keyspace and column family names you wish to store/retrieve values for.
 
