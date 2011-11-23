@@ -36,7 +36,7 @@ public class CassandraScheme extends Scheme {
     private Fields nameFields;
 
     /**
-     * Creates a {@link Scheme} for dealing with a regular Column Family.
+     * Creates a {@link Scheme} suitable for using with a Sink.
      * @param keyField      the field to use for the row key
      * @param columnFields  column names
      */
@@ -45,6 +45,10 @@ public class CassandraScheme extends Scheme {
         this.columnFields = columnFields;
     }
 
+    /**
+     * Creates a {@link Scheme} suitable for using with a Source.
+     * @param fields
+     */
     public CassandraScheme(Fields fields) {
         this.nameFields = fields;
     }
@@ -83,20 +87,6 @@ public class CassandraScheme extends Scheme {
             }
             t.add(col.value());
         }
-
-        // should pull column name as byte buffer selection from name fields?
-//        int i = 0;
-//        for (ByteBuffer n : values.keySet()) {
-//            try {
-//                LOGGER.info("n: {}", ByteBufferUtil.string(n));
-//            } catch (CharacterCodingException e) {
-//                throw new RuntimeException(e);
-//            }
-//
-//            IColumn column = values.get(n);
-//            tupleEntry.set(i, "test");
-//            i++;
-//        }
 
         return t;
     }
