@@ -91,9 +91,8 @@ public class CassandraFlowTest {
         Tap source = new Lfs(new TextLine(), inputFile);
         Pipe parsePipe = new Each("insert", new Fields("line"), new RegexSplitter(new Fields("num", "lower", "upper"), " "));
         Fields keyFields = new Fields("num");
-        Fields[] valueFields = new Fields[] {new Fields("lower"), new Fields("upper")};
 
-        CassandraScheme scheme = new CassandraScheme(keyFields, valueFields);
+        CassandraScheme scheme = new CassandraScheme(keyFields, new Fields("lower", "upper"));
         Tap sink = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
 
         Flow parseFlow = new FlowConnector(properties).connect(source, sink, parsePipe);

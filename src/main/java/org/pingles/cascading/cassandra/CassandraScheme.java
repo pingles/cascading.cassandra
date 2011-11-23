@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.CharacterCodingException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -32,17 +33,16 @@ import java.util.TreeMap;
 public class CassandraScheme extends Scheme {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(CassandraScheme.class);
     private Fields keyField;
-    private Fields[] columnFields;
     private Fields nameFields;
 
     /**
      * Creates a {@link Scheme} suitable for using with a Sink.
      * @param keyField      the field to use for the row key
-     * @param columnFields  column names
+     * @param nameFields  column names
      */
-    public CassandraScheme(Fields keyField, Fields[] columnFields) {
+    public CassandraScheme(Fields keyField, Fields nameFields) {
         this.keyField = keyField;
-        this.columnFields = columnFields;
+        this.nameFields = nameFields;
     }
 
     /**
@@ -97,19 +97,12 @@ public class CassandraScheme extends Scheme {
         TypeInferringSerializer<Object> serializer = TypeInferringSerializer.get();
         byte[] keyBytes = serializer.toBytes(key.get(0));
 
-        for (Fields selector : columnFields) {
-            TupleEntry values = tupleEntry.selectEntry(selector);
+        for (int i = 0; i < nameFields.size(); i++) {
+            Comparable name = nameFields.get(i);
+            Comparable value = tupleEntry.selectEntry(new Fields(name)).get(name);
 
-            for (int j = 0; j < values.getFields().size(); j++) {
-                Fields fields = values.getFields();
-                Tuple tuple = values.getTuple();
-
-                Object name = fields.get(j);
-                Object value = tuple.get(j);
-
-                Mutation mutation = createColumnPutMutation(ByteBuffer.wrap(serializer.toBytes(name)), ByteBuffer.wrap(serializer.toBytes(value)));
-                outputCollector.collect(ByteBuffer.wrap(keyBytes), Collections.singletonList(mutation));
-            }
+            Mutation mutation = createColumnPutMutation(ByteBuffer.wrap(serializer.toBytes(name)), ByteBuffer.wrap(serializer.toBytes(value)));
+            outputCollector.collect(ByteBuffer.wrap(keyBytes), Collections.singletonList(mutation));
         }
     }
 
