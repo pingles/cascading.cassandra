@@ -58,8 +58,6 @@ Finally, hook the `CassandraScheme` into a `CassandraTap` and provide the Cassan
 
 ### Using as a Source
 
-Note: The source currently does not include the key as part of the Tuple, only the column values.
-
 The `CassandraScheme` only needs to know the column names you wish to load tuple values for. Otherwise construction and use is the same as with the sink.
 
     Fields nameFields = new Fields("lower", "upper");
