@@ -8,6 +8,7 @@ import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.operation.Identity;
+import cascading.operation.Insert;
 import cascading.operation.OperationCall;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
@@ -96,6 +97,31 @@ public class CassandraFlowTest {
         Tap sink = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
 
         Flow parseFlow = new FlowConnector(properties).connect(source, sink, parsePipe);
+        parseFlow.complete();
+
+        assertEquals("a", getTestBytes("1", "lower"));
+        assertEquals("A", getTestBytes("1", "upper"));
+        assertEquals("b", getTestBytes("2", "lower"));
+        assertEquals("B", getTestBytes("2", "upper"));
+    }
+
+    @Test
+    public void testWideRowAsSink() throws Exception {
+        String inputFile = "./src/test/data/small.txt";
+        Tap source = new Lfs(new TextLine(), inputFile);
+        Pipe parsePipe = new Each("insert",
+            new Fields("line"),
+            new RegexSplitter(new Fields("num", "lower", "upper"), " "));
+        Pipe outputPipe = new Each(parsePipe,
+            new Insert(new Fields("name1", "name2"), "lower", "upper"),
+            new Fields("num", "name1", "lower", "name2", "upper"));
+
+        CassandraScheme scheme = new WideRowScheme();
+        Tap sink = new CassandraTap(
+            getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
+
+        Flow parseFlow =
+            new FlowConnector(properties).connect(source, sink, outputPipe);
         parseFlow.complete();
 
         assertEquals("a", getTestBytes("1", "lower"));
