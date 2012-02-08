@@ -36,21 +36,27 @@ public class NarrowRowScheme extends CassandraScheme {
     private Fields nameFields;
 
     /**
-     * Creates a {@link Scheme} suitable for using with a Sink.
+     * Creates a {@link Scheme} suitable for using with a source or sink.
      * @param keyField      the field to use for the row key
      * @param nameFields  column names
      */
     public NarrowRowScheme(Fields keyField, Fields nameFields) {
         this.keyField = keyField;
         this.nameFields = nameFields;
+        Fields fields = keyField.append(nameFields);
+        setSourceFields(fields);
+        setSinkFields(fields);
     }
 
     /**
-     * Creates a {@link Scheme} suitable for using with a Source.
+     * Creates a {@link Scheme} suitable for using with a source.
      * @param fields
      */
     public NarrowRowScheme(Fields fields) {
+        this.keyField = null;
         this.nameFields = fields;
+        setSourceFields(fields);
+        setSinkFields(fields);
     }
 
     @Override
@@ -69,19 +75,18 @@ public class NarrowRowScheme extends CassandraScheme {
 
     @Override
     public Tuple source(Object key, Object value) {
-        Tuple t = new Tuple();
-        SortedMap<ByteBuffer, IColumn> values = (SortedMap<ByteBuffer, IColumn>) value;
+        Tuple tuple = new Tuple();
+        SortedMap<ByteBuffer, IColumn> values =
+            (SortedMap<ByteBuffer, IColumn>) value;
 
-        for (IColumn col : values.values()) {
-            try {
-                LOGGER.info("n: {}", ByteBufferUtil.string(col.name()));
-            } catch (CharacterCodingException e) {
-                throw new RuntimeException(e);
-            }
-            t.add(col.value());
+        if (this.keyField != null) {
+            tuple.add((ByteBuffer) key);
+        }
+        for (IColumn col: values.values()) {
+            tuple.add(col.value());
         }
 
-        return t;
+        return tuple;
     }
 
     @Override
