@@ -5,7 +5,6 @@ import cascading.tap.Tap;
 import cascading.tuple.Fields;
 import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
-import com.sun.source.tree.Tree;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import org.apache.cassandra.db.IColumn;
 import org.apache.cassandra.hadoop.ColumnFamilyOutputFormat;
