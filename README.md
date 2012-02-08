@@ -48,23 +48,25 @@ First, create a `CassandraScheme` and specify the field to be used as the row ke
 
 ### Using as a Sink
 
+For narrow rows with known column names, use the `NarrowRowScheme`, specifying the field to use for the key and fields to use a column values.  The field names are used for the written column names:
+
     Fields keyFields = new Fields("num");
     Fields nameFields = new Fields("lower", "upper");
-    CassandraScheme scheme = new CassandraScheme(keyFields, nameFields);
+    CassandraScheme scheme = new NarrowRowScheme(keyFields, nameFields);
 
 Finally, hook the `CassandraScheme` into a `CassandraTap` and provide the Cassandra Thrift RPC Host and Port that the `ColumnFamilyOutputFormat` should connect to, as well as the keyspace and column family names you wish to store/retrieve values for.
 
     Tap sink = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
 
+For dumping wide rows, use the `WideRowScheme`, which takes no argument in construction:
+
+    CassandraScheme scheme = new WideRowScheme();
+
+This scheme expects each sunk tuple to consist of a row key followed by any number of column name / value pairs.
+
 ### Using as a Source
 
-Note: The source currently does not include the key as part of the Tuple, only the column values.
-
-The `CassandraScheme` only needs to know the column names you wish to load tuple values for. Otherwise construction and use is the same as with the sink.
-
-    Fields nameFields = new Fields("lower", "upper");
-    CassandraScheme scheme = new CassandraScheme(nameFields);
-    Tap sink = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
+Using the `NarrowRowScheme` with a source is identical to usage with a sink.  The `WideRowScheme` cannot currently be used as a source.
 
 ## License
 

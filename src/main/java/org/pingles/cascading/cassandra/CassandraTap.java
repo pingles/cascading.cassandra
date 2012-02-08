@@ -6,6 +6,7 @@ import cascading.tap.hadoop.TapCollector;
 import cascading.tap.hadoop.TapIterator;
 import cascading.tuple.TupleEntryCollector;
 import cascading.tuple.TupleEntryIterator;
+import cascading.util.Util;
 import org.apache.cassandra.hadoop.ConfigHelper;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileInputFormat;
@@ -16,15 +17,31 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 
 public class CassandraTap extends Tap {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CassandraScheme.class);
-    private static final String SCHEME = "cassandra";
+    private static final Logger LOGGER =
+        LoggerFactory.getLogger(CassandraScheme.class);
+    private static final String URI_SCHEME = "cassandra";
+    private static final String THRIFT_PORT_KEY = "cassandra.thrift.port";
+    private static final String DEFAULT_RPC_PORT = "9160";
+    private static final String DEFAULT_ADDRESS = "localhost";
 
     private final String initialAddress;
     private final Integer rpcPort;
     private String columnFamilyName;
     private String keyspace;
 
-    public CassandraTap(String initialAddress, Integer rpcPort, String keyspace, String columnFamilyName, CassandraScheme scheme) {
+    public CassandraTap(
+            String keyspace, String columnFamilyName, CassandraScheme scheme) {
+        super(scheme, SinkMode.UPDATE);
+        this.initialAddress = null;
+        this.rpcPort = null;
+        this.columnFamilyName = columnFamilyName;
+        this.keyspace = keyspace;
+    }
+
+
+    public CassandraTap(
+            String initialAddress, Integer rpcPort, String keyspace,
+            String columnFamilyName, CassandraScheme scheme) {
         super(scheme, SinkMode.APPEND);
         this.initialAddress = initialAddress;
         this.rpcPort = rpcPort;
@@ -40,9 +57,9 @@ public class CassandraTap extends Tap {
         super.sinkInit(conf);
 
         ConfigHelper.setOutputColumnFamily(conf, keyspace, columnFamilyName);
-        ConfigHelper.setPartitioner(conf, "org.apache.cassandra.dht.RandomPartitioner");
-        ConfigHelper.setInitialAddress(conf, this.initialAddress);
-        ConfigHelper.setRpcPort(conf, this.rpcPort.toString());
+        ConfigHelper.setPartitioner(conf,
+            "org.apache.cassandra.dht.RandomPartitioner");
+        endpointInit(conf);
     }
 
     @Override
@@ -52,20 +69,66 @@ public class CassandraTap extends Tap {
         FileInputFormat.addInputPaths(conf, getPath().toString());
         conf.setInputFormat(ColumnFamilyInputFormat.class);
         ConfigHelper.setInputColumnFamily(conf, keyspace, columnFamilyName);
-        ConfigHelper.setInitialAddress(conf, initialAddress);
-        ConfigHelper.setRpcPort(conf, rpcPort.toString());
+        endpointInit(conf);
 
         super.sourceInit(conf);
     }
 
+    protected void endpointInit(JobConf conf) throws IOException {
+        if (initialAddress != null) {
+            ConfigHelper.setInitialAddress(conf, initialAddress);
+        } else if (ConfigHelper.getInitialAddress(conf) == null) {
+            ConfigHelper.setInitialAddress(conf, DEFAULT_ADDRESS);
+        }
+
+        if (rpcPort != null) {
+            ConfigHelper.setRpcPort(conf, rpcPort.toString());
+        } else if (conf.get(THRIFT_PORT_KEY) == null) {
+            ConfigHelper.setRpcPort(conf, DEFAULT_RPC_PORT);
+        }
+    }
+
+    protected String getStringPath() {
+        String host = (initialAddress != null)
+            ? String.format("%s:%s", initialAddress, rpcPort) : "";
+        return String.format("%s://%s/%s/%s",
+            URI_SCHEME, host, keyspace, columnFamilyName);
+    }
+
     @Override
     public Path getPath() {
-        return new Path(String.format("%s://%s:%d/%s/%s", SCHEME, initialAddress, rpcPort, keyspace, columnFamilyName));
+        return new Path(getStringPath());
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName()
+            + "[\"" + URI_SCHEME + "\"]"
+            + "[\"" + Util.sanitizeUrl(getStringPath()) + "\"]";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        if (!super.equals(obj)) return false;
+
+        CassandraTap tap = (CassandraTap) obj;
+        if (!getScheme().equals(tap.getScheme())) return false;
+        return getStringPath().equals(tap.getStringPath());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + getStringPath().hashCode();
+        return result;
     }
 
     @Override
     public TupleEntryIterator openForRead(JobConf jobConf) throws IOException {
-        return new TupleEntryIterator(getSourceFields(), new TapIterator(this, jobConf));
+        return new TupleEntryIterator(
+            getSourceFields(), new TapIterator(this, jobConf));
     }
 
     @Override
@@ -75,21 +138,25 @@ public class CassandraTap extends Tap {
 
     @Override
     public boolean makeDirs(JobConf jobConf) throws IOException {
-        throw new UnsupportedOperationException("makeDirs unsupported with Cassandra.");
+        throw new UnsupportedOperationException(
+            "makeDirs unsupported with Cassandra.");
     }
 
     @Override
     public boolean deletePath(JobConf jobConf) throws IOException {
-        throw new UnsupportedOperationException("deletePath unsupported with Cassandra.");
+        throw new UnsupportedOperationException(
+            "deletePath unsupported with Cassandra.");
     }
 
     @Override
     public boolean pathExists(JobConf jobConf) throws IOException {
-        throw new UnsupportedOperationException("pathExists unsupported with Cassandra.");
+        throw new UnsupportedOperationException(
+            "pathExists unsupported with Cassandra.");
     }
 
     @Override
     public long getPathModified(JobConf jobConf) throws IOException {
-        throw new UnsupportedOperationException("getPathModified unsupported with Cassandra.");
+        throw new UnsupportedOperationException(
+            "getPathModified unsupported with Cassandra.");
     }
 }

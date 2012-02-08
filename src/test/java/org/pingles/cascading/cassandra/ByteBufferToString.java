@@ -16,6 +16,10 @@ import java.nio.charset.CharacterCodingException;
 
 public class ByteBufferToString extends Identity {
 
+    public ByteBufferToString() {
+        super();
+    }
+
     public ByteBufferToString(Fields fields) {
         super(fields);
     }

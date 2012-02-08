@@ -28,7 +28,6 @@ import org.apache.cassandra.thrift.TBinaryProtocol;
 import org.apache.cassandra.utils.ByteBufferUtil;
 import org.apache.cassandra.utils.FBUtilities;
 import org.apache.cassandra.utils.Pair;
-import org.apache.commons.collections.MapUtils;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.thrift.TException;
@@ -129,8 +128,10 @@ public class ColumnFamilyRecordReader implements RecordReader<ByteBuffer, Sorted
 
         ByteBuffer currentKey = currentRow.left;
         SortedMap<ByteBuffer, IColumn> currentValue = currentRow.right;
+        keyBuffer.clear();
+        keyBuffer.put(currentKey);
+        keyBuffer.flip();
 
-        ByteBufferUtil.arrayCopy(currentKey, 0, keyBytesBuffer.array(), 0, currentKey.array().length);
         valueMap.clear();
         valueMap.putAll(currentValue);
 
