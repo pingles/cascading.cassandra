@@ -31,7 +31,7 @@ public class CassandraTap extends Tap {
 
     public CassandraTap(
             String keyspace, String columnFamilyName, CassandraScheme scheme) {
-        super(scheme, SinkMode.APPEND);
+        super(scheme, SinkMode.UPDATE);
         this.initialAddress = null;
         this.rpcPort = null;
         this.columnFamilyName = columnFamilyName;
