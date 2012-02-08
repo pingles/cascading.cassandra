@@ -86,13 +86,13 @@ public class CassandraFlowTest {
     }
 
     @Test
-    public void testCassandraAsSink() throws Exception {
+    public void testNarrowRowAsSink() throws Exception {
         String inputFile = "./src/test/data/small.txt";
         Tap source = new Lfs(new TextLine(), inputFile);
         Pipe parsePipe = new Each("insert", new Fields("line"), new RegexSplitter(new Fields("num", "lower", "upper"), " "));
         Fields keyFields = new Fields("num");
 
-        CassandraScheme scheme = new CassandraScheme(keyFields, new Fields("lower", "upper"));
+        CassandraScheme scheme = new NarrowRowScheme(keyFields, new Fields("lower", "upper"));
         Tap sink = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
 
         Flow parseFlow = new FlowConnector(properties).connect(source, sink, parsePipe);
@@ -105,13 +105,13 @@ public class CassandraFlowTest {
     }
 
     @Test
-    public void testCassandraAsSource() throws Exception {
+    public void testNarrowRowAsSource() throws Exception {
         client.put(columnFamilyName, toBytes("21"), toBytes("lower"), toBytes("a"));
         client.put(columnFamilyName, toBytes("21"), toBytes("upper"), toBytes("A"));
         client.put(columnFamilyName, toBytes("22"), toBytes("lower"), toBytes("b"));
         client.put(columnFamilyName, toBytes("22"), toBytes("upper"), toBytes("B"));
 
-        CassandraScheme scheme = new CassandraScheme(new Fields("lower", "upper"));
+        CassandraScheme scheme = new NarrowRowScheme(new Fields("lower", "upper"));
         Tap source = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
         Tap sink = new Lfs(new TextLine(), "./tmp/test/cassandraAsSourceOutput.txt", SinkMode.REPLACE);
         Pipe copyPipe = new Each("read", new ByteBufferToString(new Fields("lower", "upper")));
@@ -125,7 +125,7 @@ public class CassandraFlowTest {
     }
 
     @Test
-    public void testSourceSpecifyingColumnNames() throws Exception {
+    public void testNarrowRowSourceSpecifyingColumnNames() throws Exception {
         client.put(columnFamilyName, toBytes("21"), toBytes("lower"), toBytes("a"));
         client.put(columnFamilyName, toBytes("21"), toBytes("upper"), toBytes("A"));
         client.put(columnFamilyName, toBytes("22"), toBytes("lower"), toBytes("b"));
@@ -133,7 +133,7 @@ public class CassandraFlowTest {
 
         Fields inputFields = new Fields("lower", "upper");
         Fields outputFields = new Fields("upper");
-        CassandraScheme scheme = new CassandraScheme(inputFields);
+        CassandraScheme scheme = new NarrowRowScheme(inputFields);
         Tap source = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
         Tap sink = new Lfs(new TextLine(), "./tmp/test/cassandraAsSourceOutput.txt", SinkMode.REPLACE);
 
