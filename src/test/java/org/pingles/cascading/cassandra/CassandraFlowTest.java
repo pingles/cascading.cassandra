@@ -8,9 +8,11 @@ import cascading.operation.Filter;
 import cascading.operation.Function;
 import cascading.operation.FunctionCall;
 import cascading.operation.Identity;
+import cascading.operation.Insert;
 import cascading.operation.OperationCall;
 import cascading.operation.regex.RegexSplitter;
 import cascading.pipe.Each;
+import cascading.pipe.GroupBy;
 import cascading.pipe.Pipe;
 import cascading.scheme.TextLine;
 import cascading.tap.Lfs;
@@ -86,13 +88,13 @@ public class CassandraFlowTest {
     }
 
     @Test
-    public void testCassandraAsSink() throws Exception {
+    public void testNarrowRowAsSink() throws Exception {
         String inputFile = "./src/test/data/small.txt";
         Tap source = new Lfs(new TextLine(), inputFile);
         Pipe parsePipe = new Each("insert", new Fields("line"), new RegexSplitter(new Fields("num", "lower", "upper"), " "));
         Fields keyFields = new Fields("num");
 
-        CassandraScheme scheme = new CassandraScheme(keyFields, new Fields("lower", "upper"));
+        CassandraScheme scheme = new NarrowRowScheme(keyFields, new Fields("lower", "upper"));
         Tap sink = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
 
         Flow parseFlow = new FlowConnector(properties).connect(source, sink, parsePipe);
@@ -105,18 +107,44 @@ public class CassandraFlowTest {
     }
 
     @Test
-    public void testCassandraAsSource() throws Exception {
+    public void testWideRowAsSink() throws Exception {
+        String inputFile = "./src/test/data/small.txt";
+        Tap source = new Lfs(new TextLine(), inputFile);
+        Pipe parsePipe = new Each("insert",
+            new Fields("line"),
+            new RegexSplitter(new Fields("num", "lower", "upper"), " "));
+        Pipe outputPipe = new Each(parsePipe,
+            new Insert(new Fields("name1", "name2"), "lower", "upper"),
+            new Fields("num", "name1", "lower", "name2", "upper"));
+
+        CassandraScheme scheme = new WideRowScheme();
+        Tap sink = new CassandraTap(
+            getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
+
+        Flow parseFlow =
+            new FlowConnector(properties).connect(source, sink, outputPipe);
+        parseFlow.complete();
+
+        assertEquals("a", getTestBytes("1", "lower"));
+        assertEquals("A", getTestBytes("1", "upper"));
+        assertEquals("b", getTestBytes("2", "lower"));
+        assertEquals("B", getTestBytes("2", "upper"));
+    }
+
+    @Test
+    public void testNarrowRowAsSource() throws Exception {
         client.put(columnFamilyName, toBytes("21"), toBytes("lower"), toBytes("a"));
         client.put(columnFamilyName, toBytes("21"), toBytes("upper"), toBytes("A"));
         client.put(columnFamilyName, toBytes("22"), toBytes("lower"), toBytes("b"));
         client.put(columnFamilyName, toBytes("22"), toBytes("upper"), toBytes("B"));
 
-        CassandraScheme scheme = new CassandraScheme(new Fields("lower", "upper"));
+        CassandraScheme scheme = new NarrowRowScheme(new Fields("lower", "upper"));
         Tap source = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
         Tap sink = new Lfs(new TextLine(), "./tmp/test/cassandraAsSourceOutput.txt", SinkMode.REPLACE);
         Pipe copyPipe = new Each("read", new ByteBufferToString(new Fields("lower", "upper")));
-        Flow copyFlow = new FlowConnector(properties).connect(source, sink, copyPipe);
-        copyFlow.complete();
+        Pipe sortPipe = new GroupBy(copyPipe, new Fields("lower"));
+        Flow flow = new FlowConnector(properties).connect(source, sink, sortPipe);
+        flow.complete();
 
         List<String> outputContents = readLines("./tmp/test/cassandraAsSourceOutput.txt/part-00000");
         assertEquals(2, outputContents.size());
@@ -125,7 +153,28 @@ public class CassandraFlowTest {
     }
 
     @Test
-    public void testSourceSpecifyingColumnNames() throws Exception {
+    public void testNarrowRowAsSourceWithRowKey() throws Exception {
+        client.put(columnFamilyName, toBytes("21"), toBytes("lower"), toBytes("a"));
+        client.put(columnFamilyName, toBytes("21"), toBytes("upper"), toBytes("A"));
+        client.put(columnFamilyName, toBytes("22"), toBytes("lower"), toBytes("b"));
+        client.put(columnFamilyName, toBytes("22"), toBytes("upper"), toBytes("B"));
+
+        CassandraScheme scheme = new NarrowRowScheme(new Fields("row"), new Fields("lower", "upper"));
+        Tap source = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
+        Tap sink = new Lfs(new TextLine(), "./tmp/test/cassandraAsSourceOutput.txt", SinkMode.REPLACE);
+        Pipe copyPipe = new Each("read", new ByteBufferToString(new Fields("row", "lower", "upper")));
+        Pipe sortPipe = new GroupBy(copyPipe, new Fields("row"));
+        Flow flow = new FlowConnector(properties).connect(source, sink, sortPipe);
+        flow.complete();
+
+        List<String> outputContents = readLines("./tmp/test/cassandraAsSourceOutput.txt/part-00000");
+        assertEquals(2, outputContents.size());
+        assertEquals("21\ta\tA", outputContents.get(0));
+        assertEquals("22\tb\tB", outputContents.get(1));
+    }
+
+    @Test
+    public void testNarrowRowSourceSpecifyingColumnNames() throws Exception {
         client.put(columnFamilyName, toBytes("21"), toBytes("lower"), toBytes("a"));
         client.put(columnFamilyName, toBytes("21"), toBytes("upper"), toBytes("A"));
         client.put(columnFamilyName, toBytes("22"), toBytes("lower"), toBytes("b"));
@@ -133,14 +182,15 @@ public class CassandraFlowTest {
 
         Fields inputFields = new Fields("lower", "upper");
         Fields outputFields = new Fields("upper");
-        CassandraScheme scheme = new CassandraScheme(inputFields);
+        CassandraScheme scheme = new NarrowRowScheme(inputFields);
         Tap source = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
         Tap sink = new Lfs(new TextLine(), "./tmp/test/cassandraAsSourceOutput.txt", SinkMode.REPLACE);
 
-        Pipe copyPipe = new Each("read", new ByteBufferToString(inputFields), inputFields);
+        Pipe copyPipe = new Each("read", inputFields, new ByteBufferToString());
         copyPipe = new Each(copyPipe, outputFields, new Identity());
-        Flow copyFlow = new FlowConnector(properties).connect(source, sink, copyPipe);
-        copyFlow.complete();
+        Pipe sortPipe = new GroupBy(copyPipe, new Fields("upper"));
+        Flow flow = new FlowConnector(properties).connect(source, sink, sortPipe);
+        flow.complete();
 
         List<String> outputContents = readLines("./tmp/test/cassandraAsSourceOutput.txt/part-00000");
         assertEquals(2, outputContents.size());
