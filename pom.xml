@@ -6,7 +6,7 @@
 
     <groupId>cascading.pingles</groupId>
     <artifactId>cascading.cassandra</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>0.0.2</version>
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
