@@ -15,6 +15,7 @@ import org.pingles.cascading.cassandra.hadoop.ColumnFamilyInputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
+import java.util.UUID;
 
 public class CassandraTap extends Tap {
     private static final Logger LOGGER =
@@ -26,6 +27,7 @@ public class CassandraTap extends Tap {
 
     private final String initialAddress;
     private final Integer rpcPort;
+    private final String pathUUID;
     private String columnFamilyName;
     private String keyspace;
 
@@ -36,6 +38,7 @@ public class CassandraTap extends Tap {
         this.rpcPort = null;
         this.columnFamilyName = columnFamilyName;
         this.keyspace = keyspace;
+	this.pathUUID = java.util.UUID.randomUUID().toString();
     }
 
 
@@ -47,6 +50,7 @@ public class CassandraTap extends Tap {
         this.rpcPort = rpcPort;
         this.columnFamilyName = columnFamilyName;
         this.keyspace = keyspace;
+	this.pathUUID = java.util.UUID.randomUUID().toString();
     }
 
     @Override
@@ -88,7 +92,7 @@ public class CassandraTap extends Tap {
         }
     }
 
-    protected String getStringPath() {
+    protected String getStringURI() {
         String host = (initialAddress != null)
             ? String.format("%s:%s", initialAddress, rpcPort) : "";
         return String.format("%s://%s/%s/%s",
@@ -97,14 +101,15 @@ public class CassandraTap extends Tap {
 
     @Override
     public Path getPath() {
-        return new Path(getStringPath());
+        return new Path(pathUUID);
     }
 
     @Override
     public String toString() {
         return getClass().getSimpleName()
             + "[\"" + URI_SCHEME + "\"]"
-            + "[\"" + Util.sanitizeUrl(getStringPath()) + "\"]";
+            + "[\"" + Util.sanitizeUrl(getStringURI()) + "\"]"
+            + "[\"" + pathUUID + "\"]";
     }
 
     @Override
@@ -115,13 +120,13 @@ public class CassandraTap extends Tap {
 
         CassandraTap tap = (CassandraTap) obj;
         if (!getScheme().equals(tap.getScheme())) return false;
-        return getStringPath().equals(tap.getStringPath());
+        return getStringURI().equals(tap.getStringURI());
     }
 
     @Override
     public int hashCode() {
         int result = super.hashCode();
-        result = 31 * result + getStringPath().hashCode();
+        result = 31 * result + getStringURI().hashCode();
         return result;
     }
 
