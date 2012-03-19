@@ -2,6 +2,8 @@
 
 A [Cascading](http://www.cascading.org) Scheme and Tap for [Cassandra](http://cassandra.apache.org) and can operate as both a Sink and a Source.
 
+Current build status: ![Build status](https://secure.travis-ci.org/pingles/cascading.cassandra.png)
+
 ## Installing
 
 The project can be built using [Maven](http://maven.apache.org) and installed into your local repository:
@@ -12,7 +14,7 @@ Alternatively, there's a snapshot available from [Conjars](http://conjars.org/ca
 
 ### Leiningen
 
-    [cascading.pingles/cascading.cassandra "0.0.1-SNAPSHOT"]
+    [cascading.cassandra/cascading.cassandra "0.0.2"]
     
 and add the repository into your `project.clj` with
 
@@ -21,9 +23,9 @@ and add the repository into your `project.clj` with
 ### Maven
 
     <dependency>
-      <groupId>cascading.pingles</groupId>
+      <groupId>cascading.cassandra</groupId>
       <artifactId>cascading.cassandra</artifactId>
-      <version>0.0.1-SNAPSHOT</version>
+      <version>0.0.2</version>
     </dependency>
 
 If you haven't already added it you'll need to add the Conjars repository
