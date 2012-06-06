@@ -83,15 +83,14 @@ public class NarrowRowScheme extends CassandraScheme {
             tuple.add((ByteBuffer) key);
         }
 
-		for (Comparable k: this.nameFields) {
-			IColumn v = values.get(TypeInferringSerializer.get().toByteBuffer(k));
-			if (v != null) {
-				tuple.add(v.value());
-			}
-			else {
-				tuple.add(null);
-			}
-		}
+        for (Comparable k: this.nameFields) {
+            IColumn v = values.get(TypeInferringSerializer.get().toByteBuffer(k));
+            if (v != null) {
+                tuple.add(v.value());
+            } else {
+                tuple.add(null);
+            }
+        }
 
         return tuple;
     }
