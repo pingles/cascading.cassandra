@@ -7,33 +7,25 @@ import cascading.tuple.Tuple;
 import cascading.tuple.TupleEntry;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import org.apache.cassandra.db.IColumn;
-import org.apache.cassandra.hadoop.ColumnFamilyOutputFormat;
 import org.apache.cassandra.hadoop.ConfigHelper;
-import org.apache.cassandra.thrift.Column;
-import org.apache.cassandra.thrift.ColumnOrSuperColumn;
 import org.apache.cassandra.thrift.Mutation;
 import org.apache.cassandra.thrift.SlicePredicate;
-import org.apache.cassandra.utils.ByteBufferUtil;
-import org.apache.commons.lang.NotImplementedException;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.OutputCollector;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.charset.CharacterCodingException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.SortedMap;
-import java.util.TreeMap;
 
 public class NarrowRowScheme extends CassandraScheme {
     private static final org.slf4j.Logger LOGGER =
         LoggerFactory.getLogger(NarrowRowScheme.class);
     private Fields keyField;
     private Fields nameFields;
+    private String[] names;
 
     /**
      * Creates a {@link Scheme} suitable for using with a source or sink.
@@ -46,6 +38,34 @@ public class NarrowRowScheme extends CassandraScheme {
         Fields fields = keyField.append(nameFields);
         setSourceFields(fields);
         setSinkFields(fields);
+    }
+
+    /**
+     * Creates a {@link Scheme} suitable for using as a sink or source.
+     * @param keyField the field to use as the row key
+     * @param nameFields the Cascading fields to bind to
+     * @param names the name values that will be used when mutating the Cassandra column family.
+     * @throws IllegalArgumentException if nameFields and names contain a different number of elements.
+     */
+    public NarrowRowScheme(Fields keyField, Fields nameFields, String[] names) throws IllegalArgumentException {
+        this(keyField, nameFields);
+        if (nameFields.size() != names.length) {
+            throw new IllegalArgumentException("nameFields and names must contain the same number of items.");
+        }
+        this.names = names;
+    }
+
+    /**
+     * Creates a {@link Scheme} suitable for using as a source
+     * @param nameFields fields to bind column names to
+     * @param names the name values in Cassandra
+     */
+    public NarrowRowScheme(Fields nameFields, String[] names) throws IllegalArgumentException {
+        this(nameFields);
+        if (nameFields.size() != names.length) {
+            throw new IllegalArgumentException("nameFields and names must contain the same number of items.");
+        }
+        this.names = names;
     }
 
     /**
@@ -64,7 +84,7 @@ public class NarrowRowScheme extends CassandraScheme {
         List<ByteBuffer> columnNames = new ArrayList<ByteBuffer>();
 
         for (int i = 0; i < nameFields.size(); i++) {
-            Object columnName = nameFields.get(i);
+            Object columnName = getName(i);
             LOGGER.info("Adding input column name: {}", columnName);
             columnNames.add(TypeInferringSerializer.get().toByteBuffer(columnName));
         }
@@ -83,16 +103,26 @@ public class NarrowRowScheme extends CassandraScheme {
             tuple.add((ByteBuffer) key);
         }
 
-        for (Comparable k: this.nameFields) {
-            IColumn v = values.get(TypeInferringSerializer.get().toByteBuffer(k));
-            if (v != null) {
-                tuple.add(v.value());
-            } else {
-                tuple.add(null);
+        if (this.names != null) {
+            for (String k : this.names) {
+                updateTuple(tuple, values, k);
+            }
+        } else {
+            for (Comparable k : this.nameFields) {
+                updateTuple(tuple, values, k);
             }
         }
 
         return tuple;
+    }
+
+    private void updateTuple(Tuple tuple, SortedMap<ByteBuffer, IColumn> values, Comparable name) {
+        IColumn v = values.get(TypeInferringSerializer.get().toByteBuffer(name));
+        if (v != null) {
+            tuple.add(v.value());
+        } else {
+            tuple.add(null);
+        }
     }
 
     @Override
@@ -109,9 +139,17 @@ public class NarrowRowScheme extends CassandraScheme {
             Comparable value = tupleEntry.get(name);
 
             Mutation mutation = createColumnPutMutation(
-                serialize(serializer, name), serialize(serializer, value));
+                serialize(serializer, getName(i)), serialize(serializer, value));
             mutations.add(mutation);
         }
         outputCollector.collect(keyBuffer, mutations);
+    }
+
+    private Comparable getName(int fieldPos) {
+        if (this.names == null) {
+            return nameFields.get(fieldPos);
+        }
+
+        return names[fieldPos];
     }
 }
