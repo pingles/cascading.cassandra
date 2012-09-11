@@ -124,6 +124,26 @@ public class CassandraFlowTest {
         assertEquals("b", getTestBytes("2", "lower"));
         assertEquals("B", getTestBytes("2", "upper"));
     }
+    
+    @Test
+    public void testWideRowAsSource() throws Exception {
+        client.put(columnFamilyName, toBytes("21"), toBytes("lower"), toBytes("a"));
+        client.put(columnFamilyName, toBytes("21"), toBytes("upper"), toBytes("A"));
+        client.put(columnFamilyName, toBytes("22"), toBytes("lower"), toBytes("b"));
+        client.put(columnFamilyName, toBytes("22"), toBytes("upper"), toBytes("B"));
+
+        CassandraScheme scheme = new WideRowScheme();
+        Tap source = new CassandraTap(getRpcHost(), getRpcPort(), keyspaceName, columnFamilyName, scheme);
+        Tap sink = new Lfs(new TextLine(), "./tmp/test/cassandraAsSourceOutput.txt", SinkMode.REPLACE);
+        Pipe copyPipe = new Each("read", new ByteBufferToString());
+        Flow flow = new FlowConnector(properties).connect(source, sink, copyPipe);
+        flow.complete();
+
+        List<String> outputContents = readLines("./tmp/test/cassandraAsSourceOutput.txt/part-00000");
+        assertEquals(2, outputContents.size());
+        assertEquals("21	lower	a	upper	A", outputContents.get(0));
+        assertEquals("22	lower	b	upper	B", outputContents.get(1));
+    }
 
     @Test
     public void testWideRowAsSink() throws Exception {

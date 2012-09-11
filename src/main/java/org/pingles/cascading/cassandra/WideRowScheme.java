@@ -27,23 +27,45 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import org.apache.cassandra.thrift.SliceRange;
 
 public class WideRowScheme extends CassandraScheme {
     private static final org.slf4j.Logger LOGGER =
         LoggerFactory.getLogger(WideRowScheme.class);
 
+    private int maxColumns = 5000;
     /**
      * Creates a {@link Scheme} suitable for using with a Sink.
      */
     public WideRowScheme() {
     }
 
-    @Override
+    public WideRowScheme(int maxColumns) {
+    	this.maxColumns = maxColumns;
+    }
+    
+	public void setMaxColumns(int maxColumns) {
+		this.maxColumns = maxColumns;
+	}
+
+	@Override
     public void sourceInit(Tap tap, JobConf jobConf) throws IOException {
-        throw new UnsupportedOperationException(
-            "using wide rows for sources is not yet implemented");
+		
+        List<ByteBuffer> columnNames = new ArrayList<ByteBuffer>();
+
+        SlicePredicate predicate = new SlicePredicate();
+
+        SliceRange sliceRange = new SliceRange();
+        sliceRange.start = ByteBuffer.allocate(0);
+        sliceRange.finish = ByteBuffer.allocate(0);
+        sliceRange.reversed = false;
+        sliceRange.count = maxColumns;
+        predicate.setSlice_range( sliceRange );
+        ConfigHelper.setInputSlicePredicate(jobConf, predicate);
+
     }
 
     @Override
@@ -55,8 +77,25 @@ public class WideRowScheme extends CassandraScheme {
 
     @Override
     public Tuple source(Object key, Object value) {
-        throw new UnsupportedOperationException(
-            "using wide rows for sources is not yet implemented");
+    	
+        Tuple tuple = new Tuple();
+        SortedMap<ByteBuffer, IColumn> values =
+            (SortedMap<ByteBuffer, IColumn>) value;
+
+        tuple.add((ByteBuffer) key );
+        
+        Set<ByteBuffer> keySets = values.keySet();
+        for(ByteBuffer name : keySets) {
+        	IColumn v = values.get(name);
+        	tuple.add( (ByteBuffer) name );
+            if (v != null) {
+                tuple.add(v.value());
+            } else {
+                tuple.add(null);
+            }
+        }
+
+        return tuple;
     }
 
     @Override
