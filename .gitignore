@@ -1,3 +1,8 @@
 target
 tmp
 *.iws
+cascading.cassandra.iml
+cascading.cassandra.ipr
+.project
+.classpath
+.settings

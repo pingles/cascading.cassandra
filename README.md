@@ -14,7 +14,7 @@ Alternatively, there's a snapshot available from [Conjars](http://conjars.org/ca
 
 ### Leiningen
 
-    [cascading.cassandra/cascading.cassandra "0.0.2"]
+    [cascading.cassandra/cascading.cassandra "0.0.4"]
     
 and add the repository into your `project.clj` with
 
@@ -25,7 +25,7 @@ and add the repository into your `project.clj` with
     <dependency>
       <groupId>cascading.cassandra</groupId>
       <artifactId>cascading.cassandra</artifactId>
-      <version>0.0.2</version>
+      <version>0.0.4</version>
     </dependency>
 
 If you haven't already added it you'll need to add the Conjars repository
