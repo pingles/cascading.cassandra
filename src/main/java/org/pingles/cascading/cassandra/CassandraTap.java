@@ -11,7 +11,7 @@ import org.apache.cassandra.hadoop.ConfigHelper;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.JobConf;
-import org.pingles.cascading.cassandra.hadoop.ColumnFamilyInputFormat;
+import org.apache.cassandra.hadoop.ColumnFamilyInputFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.io.IOException;
@@ -50,7 +50,7 @@ public class CassandraTap extends Tap {
         this.rpcPort = rpcPort;
         this.columnFamilyName = columnFamilyName;
         this.keyspace = keyspace;
-	this.pathUUID = java.util.UUID.randomUUID().toString();
+		this.pathUUID = java.util.UUID.randomUUID().toString();
     }
 
     @Override
@@ -61,18 +61,19 @@ public class CassandraTap extends Tap {
         super.sinkInit(conf);
 
         ConfigHelper.setOutputColumnFamily(conf, keyspace, columnFamilyName);
-        ConfigHelper.setPartitioner(conf,
-            "org.apache.cassandra.dht.RandomPartitioner");
+        ConfigHelper.setOutputPartitioner(conf, "org.apache.cassandra.dht.RandomPartitioner");
         endpointInit(conf);
     }
 
     @Override
     public void sourceInit(JobConf conf) throws IOException {
+        LOGGER.info("Created Cassandra tap {}", getPath());
         LOGGER.info("Sourcing from column family: {}", columnFamilyName);
 
         FileInputFormat.addInputPaths(conf, getPath().toString());
         conf.setInputFormat(ColumnFamilyInputFormat.class);
         ConfigHelper.setInputColumnFamily(conf, keyspace, columnFamilyName);
+        ConfigHelper.setInputPartitioner(conf, "org.apache.cassandra.dht.RandomPartitioner");
         endpointInit(conf);
 
         super.sourceInit(conf);
@@ -80,15 +81,19 @@ public class CassandraTap extends Tap {
 
     protected void endpointInit(JobConf conf) throws IOException {
         if (initialAddress != null) {
-            ConfigHelper.setInitialAddress(conf, initialAddress);
-        } else if (ConfigHelper.getInitialAddress(conf) == null) {
-            ConfigHelper.setInitialAddress(conf, DEFAULT_ADDRESS);
+            ConfigHelper.setInputInitialAddress(conf, initialAddress);
+            ConfigHelper.setOutputInitialAddress(conf, initialAddress);
+        } else if (ConfigHelper.getInputInitialAddress(conf) == null) {
+            ConfigHelper.setInputInitialAddress(conf, DEFAULT_ADDRESS);
+            ConfigHelper.setOutputInitialAddress(conf, DEFAULT_ADDRESS);
         }
 
         if (rpcPort != null) {
-            ConfigHelper.setRpcPort(conf, rpcPort.toString());
+            ConfigHelper.setInputRpcPort(conf, rpcPort.toString());
+            ConfigHelper.setOutputRpcPort(conf, rpcPort.toString());
         } else if (conf.get(THRIFT_PORT_KEY) == null) {
-            ConfigHelper.setRpcPort(conf, DEFAULT_RPC_PORT);
+            ConfigHelper.setInputRpcPort(conf, DEFAULT_RPC_PORT);
+            ConfigHelper.setOutputRpcPort(conf, DEFAULT_RPC_PORT);
         }
     }
 
