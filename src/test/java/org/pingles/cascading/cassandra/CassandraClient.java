@@ -142,7 +142,7 @@ public class CassandraClient {
         client.recv_set_keyspace();
     }
 
-    public void truncate(String columnFamilyName) throws TException, InvalidRequestException, UnavailableException {
+    public void truncate(String columnFamilyName) throws TException, InvalidRequestException, UnavailableException, TimedOutException {
         LOGGER.info("Truncating {}", columnFamilyName);
         client.send_truncate(columnFamilyName);
         client.recv_truncate();

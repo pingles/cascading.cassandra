@@ -79,7 +79,7 @@ public class CassandraFlowTest {
     }
 
     @After
-    public void afterTest() throws TException, InvalidRequestException, UnavailableException {
+    public void afterTest() throws TException, InvalidRequestException, UnavailableException, TimedOutException {
         try {
             client.truncate(columnFamilyName);
         } finally {
@@ -124,7 +124,7 @@ public class CassandraFlowTest {
         assertEquals("b", getTestBytes("2", "lower"));
         assertEquals("B", getTestBytes("2", "upper"));
     }
-    
+
     @Test
     public void testWideRowAsSource() throws Exception {
         client.put(columnFamilyName, toBytes("21"), toBytes("lower"), toBytes("a"));
