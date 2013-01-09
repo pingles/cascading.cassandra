@@ -79,7 +79,7 @@ public class CassandraFlowTest {
     }
 
     @After
-    public void afterTest() throws TException, InvalidRequestException, UnavailableException {
+    public void afterTest() throws TException, InvalidRequestException, UnavailableException, TimedOutException {
         try {
             client.truncate(columnFamilyName);
         } finally {

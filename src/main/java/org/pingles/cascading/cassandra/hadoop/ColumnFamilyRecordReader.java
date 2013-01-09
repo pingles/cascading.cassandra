@@ -76,8 +76,8 @@ public class ColumnFamilyRecordReader implements RecordReader<ByteBuffer, Sorted
         this.columnFamily = ConfigHelper.getInputColumnFamily(jobConf);
         this.consistencyLevel = ConsistencyLevel.valueOf(ConfigHelper.getReadConsistencyLevel(jobConf));
         this.keyspace = ConfigHelper.getInputKeyspace(jobConf);
-        this.initialAddress = ConfigHelper.getInitialAddress(jobConf);
-        this.rpcPort = ConfigHelper.getRpcPort(jobConf);
+        this.initialAddress = ConfigHelper.getInputInitialAddress(jobConf);
+        this.rpcPort = ConfigHelper.getInputRpcPort(jobConf);
         this.keyBytesBuffer = ByteBuffer.allocate(4096);
 
         try {
