@@ -61,9 +61,9 @@ public class CassandraTap extends Tap {
         super.sinkInit(conf);
 
         ConfigHelper.setOutputColumnFamily(conf, keyspace, columnFamilyName);
-        ConfigHelper.setPartitioner(conf,
+        ConfigHelper.setOutputPartitioner(conf,
             "org.apache.cassandra.dht.RandomPartitioner");
-        endpointInit(conf);
+        sinkEndpointInit(conf);
     }
 
     @Override
@@ -73,24 +73,39 @@ public class CassandraTap extends Tap {
         FileInputFormat.addInputPaths(conf, getPath().toString());
         conf.setInputFormat(ColumnFamilyInputFormat.class);
         ConfigHelper.setInputColumnFamily(conf, keyspace, columnFamilyName);
-        endpointInit(conf);
+        sourceEndpointInit(conf);
 
         super.sourceInit(conf);
     }
 
-    protected void endpointInit(JobConf conf) throws IOException {
+    protected void sourceEndpointInit(JobConf conf) throws IOException {
         if (initialAddress != null) {
-            ConfigHelper.setInitialAddress(conf, initialAddress);
-        } else if (ConfigHelper.getInitialAddress(conf) == null) {
-            ConfigHelper.setInitialAddress(conf, DEFAULT_ADDRESS);
+            ConfigHelper.setInputInitialAddress(conf, initialAddress);
+        } else if (ConfigHelper.getInputInitialAddress(conf) == null) {
+            ConfigHelper.setInputInitialAddress(conf, DEFAULT_ADDRESS);
         }
 
         if (rpcPort != null) {
-            ConfigHelper.setRpcPort(conf, rpcPort.toString());
+            ConfigHelper.setInputRpcPort(conf, rpcPort.toString());
         } else if (conf.get(THRIFT_PORT_KEY) == null) {
-            ConfigHelper.setRpcPort(conf, DEFAULT_RPC_PORT);
+            ConfigHelper.setInputRpcPort(conf, DEFAULT_RPC_PORT);
         }
     }
+    
+    protected void sinkEndpointInit(JobConf conf) throws IOException {
+        if (initialAddress != null) {
+            ConfigHelper.setOutputInitialAddress(conf, initialAddress);
+        } else if (ConfigHelper.getOutputInitialAddress(conf) == null) {
+            ConfigHelper.setOutputInitialAddress(conf, DEFAULT_ADDRESS);
+        }
+
+        if (rpcPort != null) {
+            ConfigHelper.setOutputRpcPort(conf, rpcPort.toString());
+        } else if (conf.get(THRIFT_PORT_KEY) == null) {
+            ConfigHelper.setOutputRpcPort(conf, DEFAULT_RPC_PORT);
+        }
+    }
+
 
     protected String getStringURI() {
         String host = (initialAddress != null)

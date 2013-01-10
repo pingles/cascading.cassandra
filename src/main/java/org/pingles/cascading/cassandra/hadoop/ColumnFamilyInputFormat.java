@@ -75,7 +75,8 @@ public class ColumnFamilyInputFormat implements InputFormat<ByteBuffer, SortedMa
             Range jobRange = null;
 
             if (jobKeyRange != null) {
-                partitioner = ConfigHelper.getPartitioner(jobConf);
+                //partitioner = ConfigHelper.getPartitioner(jobConf);
+            	partitioner = ConfigHelper.getInputPartitioner(jobConf);
                 assert partitioner.preservesOrder() : "ConfigHelper.setInputKeyRange(..) can only be used with a order preserving paritioner";
                 assert jobKeyRange.start_key == null : "only start_token supported";
                 assert jobKeyRange.end_key == null : "only end_token supported";
@@ -92,10 +93,11 @@ public class ColumnFamilyInputFormat implements InputFormat<ByteBuffer, SortedMa
                                                partitioner);
 
                     if (dhtRange.intersects(jobRange)) {
-                        for (Range intersection: dhtRange.intersectionWith(jobRange))
+                        for (Object intersectionObject: dhtRange.intersectionWith(jobRange))
                         {
-                            range.start_token = partitioner.getTokenFactory().toString(intersection.left);
-                            range.end_token = partitioner.getTokenFactory().toString(intersection.right);
+                        	Range intersection = (Range) intersectionObject;
+                            range.start_token = partitioner.getTokenFactory().toString(intersection.left.getToken());
+                            range.end_token = partitioner.getTokenFactory().toString(intersection.right.getToken());
                             // for each range, pick a live owner and ask it to compute bite-sized splits
                             splitFutures.add(executor.submit(new SplitCallable(range, jobConf)));
                         }
@@ -143,12 +145,12 @@ public class ColumnFamilyInputFormat implements InputFormat<ByteBuffer, SortedMa
 
     public static Cassandra.Client getClientFromAddressList(JobConf jobConf) throws IOException
     {
-        String[] addresses = ConfigHelper.getInitialAddress(jobConf).split(",");
+        String[] addresses = ConfigHelper.getInputInitialAddress(jobConf).split(",");
         Cassandra.Client client = null;
         List<IOException> exceptions = new ArrayList<IOException>();
         for (String address : addresses) {
             try {
-                client = createConnection(address, ConfigHelper.getRpcPort(jobConf), true);
+                client = createConnection(address, ConfigHelper.getInputRpcPort(jobConf), true);
                 break;
             } catch (IOException ioe) {
                 exceptions.add(ioe);
@@ -219,7 +221,7 @@ public class ColumnFamilyInputFormat implements InputFormat<ByteBuffer, SortedMa
         int splitsize = ConfigHelper.getInputSplitSize(conf);
         for (String host : range.rpc_endpoints) {
             try {
-                Cassandra.Client client = createConnection(host, ConfigHelper.getRpcPort(conf), true);
+                Cassandra.Client client = createConnection(host, ConfigHelper.getInputRpcPort(conf), true);
                 client.set_keyspace(keyspace);
                 return client.describe_splits(cfName, range.start_token, range.end_token, splitsize);
             } catch (IOException e) {
